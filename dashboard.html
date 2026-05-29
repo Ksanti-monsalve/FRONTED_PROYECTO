@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTallerManager — Consola Principal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-page">
+    <div class="luxury-bg-mesh"></div>
+    <div class="luxury-scanlines"></div>
+
+    <header class="app-layout-header">
+        <div class="layout-brand">
+            <span class="brand-tagline">AutoTallerManager</span>
+            <h1>Consola Principal</h1>
+        </div>
+        <nav class="layout-nav" id="layout-nav" aria-label="Módulos"></nav>
+        <div class="layout-user">
+            <div>
+                <p class="layout-user-name" id="layout-user-name">—</p>
+                <p class="layout-user-role" id="layout-user-role">—</p>
+            </div>
+            <button type="button" class="btn-dashboard" id="btn-logout">Salir</button>
+        </div>
+    </header>
+
+    <p class="api-status" id="layout-api-status">Comprobando backend...</p>
+
+    <main class="dashboard-shell">
+        <section class="stats-grid" id="stats-grid">
+            <article class="stat-card">
+                <span class="stat-label">Clientes</span>
+                <strong class="stat-value" id="stat-clientes">—</strong>
+            </article>
+            <article class="stat-card">
+                <span class="stat-label">Órdenes activas</span>
+                <strong class="stat-value" id="stat-ordenes">—</strong>
+            </article>
+            <article class="stat-card">
+                <span class="stat-label">Repuestos críticos</span>
+                <strong class="stat-value" id="stat-repuestos">—</strong>
+            </article>
+        </section>
+
+        <section class="dashboard-card">
+            <h2>Módulos del sistema</h2>
+            <div class="dashboard-modules" id="modules-grid"></div>
+        </section>
+
+        <section class="dashboard-card">
+            <h2>Actividad reciente</h2>
+            <div id="recent-activity" class="table-wrap">
+                <p class="table-loading">Sincronizando con el backend...</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="layout.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

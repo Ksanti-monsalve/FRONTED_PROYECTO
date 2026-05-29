@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<!-- saved from url=(0012)about:srcdoc -->
+<html class="dark" lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Login | AutoTallerManager</title>
+<script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 8s ease-in-out infinite;
+        }
+        .glass-card {
+            background: rgba(14, 14, 14, 0.75);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(250, 204, 21, 0.1);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+        .tech-glow {
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.2);
+        }
+        .premium-border {
+            border: 1px solid rgba(250, 204, 21, 0.08);
+        }
+        .text-tracking-enterprise {
+            letter-spacing: -0.01em;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#574500",
+                        "surface-container-high": "#2a2a2a",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#1b1b1b",
+                        "tertiary-fixed": "#e5e2e1",
+                        "surface-container-highest": "#353535",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "primary": "#facc15",
+                        "surface-tint": "#eec200",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "inverse-primary": "#735c00",
+                        "on-primary-fixed": "#231b00",
+                        "surface-bright": "#393939",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "background": "#131313",
+                        "on-tertiary": "#313030",
+                        "primary-container": "#facc15",
+                        "on-background": "#e2e2e2",
+                        "tertiary": "#efecec",
+                        "on-secondary-fixed-variant": "#474646",
+                        "surface-variant": "#353535",
+                        "on-primary": "#3c2f00",
+                        "inverse-on-surface": "#303030",
+                        "tertiary-container": "#d3d0d0",
+                        "primary-fixed-dim": "#eec200",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#e5e2e1",
+                        "secondary-container": "#4a4949",
+                        "primary-fixed": "#ffe083",
+                        "surface": "#131313",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "on-primary-container": "#6c5700",
+                        "on-secondary-container": "#bab8b7",
+                        "outline": "#9a9078",
+                        "surface-container": "#1f1f1f",
+                        "on-secondary": "#313030",
+                        "on-surface-variant": "#d1c6ab",
+                        "on-surface": "#e2e2e2",
+                        "on-tertiary-container": "#5a5959",
+                        "secondary": "#c8c6c5",
+                        "surface-dim": "#131313",
+                        "outline-variant": "#4d4632",
+                        "inverse-surface": "#e2e2e2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "gutter": "20px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "base": "4px",
+                        "xl": "40px",
+                        "container-max": "1440px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Geist"],
+                        "label-mono": ["JetBrains Mono"],
+                        "label-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-base": ["Geist"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style data-stitch-injected="">
+  /* Hide scrollbars on ALL elements (Webkit) */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbars on ALL elements (Firefox) */
+  * {
+    scrollbar-width: none;
+  }
+
+  /* Suppress horizontal overflow and legacy IE/Edge */
+  html, body {
+    overflow-x: hidden !important;
+    -ms-overflow-style: none;
+    min-height: auto !important;
+  }
+
+  /* Global text selection highlight — brand blurple */
+  ::selection {
+    background-color: rgba(96, 86, 240, 0.3) !important;
+    color: inherit !important;
+  }
+  ::-moz-selection {
+    background-color: rgba(96, 86, 240, 0.3) !important;
+    color: inherit !important;
+  }
+
+  /* Suppress browser default focus outlines and box-shadow glows globally */
+  *:focus, *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+</style><script data-stitch-injected="">(function tt(){window.addEventListener(`message`,async function(e){let t=e.data;if(!t||t.type!==`capture_screenshot`||e.source!==window.parent)return;let n=t.requestId,r=t.captureEngineSource,i=t.options||{},a=window.innerWidth,o=window.innerHeight,s=window.scrollX,c=window.scrollY,l=document.documentElement,u=l.style.width,d=l.style.height,f=l.style.overflow,p=l.style.position;try{if(!window.snapdom&&r){let e=document.createElement(`script`);e.setAttribute(`data-stitch-injected`,``),e.textContent=r,document.head.appendChild(e)}let e=window.snapdom;if(!e){window.parent.postMessage({type:`screenshot_error`,requestId:n,errorCode:`CAPTURE_ENGINE_UNAVAILABLE`,error:`Capture engine not available. Ensure source is sent with the capture request.`},`*`);return}let t=i.exclude||[`[data-stitch-injected]`];window.scrollTo(0,0),l.style.width=a+`px`,l.style.height=o+`px`,l.style.overflow=`hidden`,l.style.position=`relative`;let u=await(await e(document.documentElement,{exclude:t,embedFonts:!0,scale:i.scale||1,plugins:[{name:`stitch-viewport-clip`,afterClone:function(e){let t=e.clone;if(!(t instanceof HTMLElement))return;t.style.position=`relative`,t.style.width=a+`px`,t.style.height=o+`px`,t.style.overflow=`hidden`;let n=[],r=t.querySelectorAll(`*`);for(let e=0;e<r.length;e++){let t=r[e];t instanceof HTMLElement&&(t.style.position||(t.__snapdomComputedStyle||window.getComputedStyle(t)).position)===`fixed`&&n.push(t)}if(s!==0||c!==0){let e=t.querySelector(`body`);e&&(e.style.marginTop=-c+`px`,e.style.marginLeft=-s+`px`)}for(let e=0;e<n.length;e++)n[e].style.position=`absolute`,t.appendChild(n[e])}}]})).toCanvas({width:a,height:o}),d=i.format||`image/jpeg`,f=i.quality??.8,p=u.toDataURL(d,f);window.parent.postMessage({type:`screenshot_captured`,requestId:n,dataUrl:p,width:a,height:o},`*`)}catch(e){window.parent.postMessage({type:`screenshot_error`,requestId:n,error:e instanceof Error?e.message:String(e)},`*`)}finally{l.style.width=u,l.style.height=d,l.style.overflow=f,l.style.position=p,window.scrollTo(s,c)}})})();</script><script data-stitch-injected="">(function it(){let e=`__stitch-highlight-css`,t=`stitch-highlight-element`,n=null;function r(){if(document.getElementById(e))return;let n=document.createElement(`style`);n.id=e,n.textContent=[`@keyframes stitch-highlight-pulse {`,`  0%, 100% { box-shadow: 0 0 0 3px rgba(113,105,237,0.8), 0 0 12px 4px rgba(113,105,237,0.3); }`,`  50%      { box-shadow: 0 0 0 3px rgba(113,105,237,0.4), 0 0 6px 2px rgba(113,105,237,0.15); }`,`}`,`.`+t+` {`,`  outline: 3px solid rgba(113,105,237,0.8) !important;`,`  outline-offset: 2px !important;`,`  animation: stitch-highlight-pulse 1.5s ease-in-out infinite !important;`,`  border-radius: inherit;`,`}`].join(`
+`),document.head.appendChild(n)}function i(e){let t=e.toLowerCase().trim(),n=document.createTreeWalker(document.body,NodeFilter.SHOW_ELEMENT,null),r=null,i=-1,a=n.nextNode();for(;a;){if((a.textContent||``).trim().toLowerCase().includes(t)){let e=0,t=a.parentElement;for(;t;)e++,t=t.parentElement;e>i&&(i=e,r=a)}a=n.nextNode()}return r}function a(e){setTimeout(function(){let t=e.getBoundingClientRect(),n=window.innerWidth||1,r=window.innerHeight||1;window.parent.postMessage({type:`stitch:highlight-element-rect`,normalizedX:(t.left+t.width/2)/n,normalizedY:(t.top+t.height/2)/r,normalizedWidth:t.width/n,normalizedHeight:t.height/r},`*`)},400)}window.addEventListener(`message`,function(e){if(!e.data||e.data.type!==`stitch:highlight-element`)return;n&&=(n.classList.remove(t),null);let{text:o,selector:s}=e.data;if(!o&&!s)return;r();let c=null;if(o&&(c=i(o)),!c&&s)try{c=document.querySelector(s)}catch{}c&&(c.classList.add(t),c.scrollIntoView({behavior:`smooth`,block:`center`}),n=c,a(c))})})();</script><script data-stitch-injected="">
+        window.__PROTOTYPE_LINKS__ = [];
+        window.__PROTOTYPE_INITIAL_STATE__ = "1";
+        window.__HOTSPOTS_INITIAL__ = false;
+        
+  (function() {
+    const SCRIPT_VERSION = '2.0.0 - Unified Run/Connect';
+
+    // --- Cleanup Previous Instance ---
+    if (window.__PROTOTYPE_V2_CLEANUP__ && typeof window.__PROTOTYPE_V2_CLEANUP__ === 'function') {
+      window.__PROTOTYPE_V2_CLEANUP__();
+    }
+
+    // --- Configuration ---
+    const HOVER_CLASS = 'interactive-hover';
+    const SELECTED_CLASS = 'interactive-selected';
+    const CONNECTED_CLASS = 'interactive-connected';
+    const RUN_LINK_CLASS = 'prototype-link-hover';
+    const HOTSPOT_CLASS = 'prototype-hotspot';
+    
+    // Style IDs
+    const CONNECT_STYLE_ID = 'interactive-mode-styles';
+    const RUN_STYLE_ID = 'prototype-run-styles';
+
+    // Tags that support inline text editing via double-click
+    var TEXT_EDITABLE_TAGS = {
+      H1:1, H2:1, H3:1, H4:1, H5:1, H6:1,
+      P:1, SPAN:1, BUTTON:1, A:1, LABEL:1,
+      LI:1, TD:1, TH:1, BLOCKQUOTE:1
+    };
+
+    // State
+    let mode = 'run'; // 'run' | 'connect'
+    let currentState = window.__PROTOTYPE_INITIAL_STATE__ || '1';
+    let links = window.__PROTOTYPE_LINKS__ || [];
+    let hotspotsVisible = window.__HOTSPOTS_INITIAL__ !== undefined ? window.__HOTSPOTS_INITIAL__ : true;
+    let selectedElement = null;
+    let interactive = true; // false when parent UI (edit dialog) should suppress iframe interactions
+
+    // --- Helper: XPath Evaluator ---
+    function getElementByXPath(xpath) {
+      const evaluate = (expr) => {
+        try {
+          return document.evaluate(
+            expr, 
+            document, 
+            null, 
+            XPathResult.FIRST_ORDERED_NODE_TYPE, 
+            null
+          ).singleNodeValue;
+        } catch (e) {
+          console.warn('XPath evaluation failed:', expr, e);
+          return null;
+        }
+      };
+
+      // 1. Try direct evaluation
+      let result = evaluate(xpath);
+      
+      // 2. Try lowercased evaluation
+      if (!result) {
+        const lower = xpath.toLowerCase();
+        if (lower !== xpath) {
+             result = evaluate(lower);
+        }
+      }
+
+      // 3. Manual Traversal Fallback (Robust against case/browser quirks)
+      if (!result) {
+        try {
+          const parts = xpath.split('/').filter(p => p && p !== 'html'); // internal path often starts after html? or includes it. 
+          // Our getXPath returns e.g. "id('foo')" or "body/div[1]..."
+          
+          if (xpath.startsWith('id(')) {
+             // Already handled by evaluate usually, but manual fallback:
+             const idContent = xpath.match(/id("([^"]+)")/);
+             if (idContent && idContent[1]) {
+               return document.getElementById(idContent[1]);
+             }
+          }
+
+          let current = document.body; // Start at body? Or root?
+          // If path starts with "body", we start at document.body and consume it? 
+          // getXPathForElement returns "body/div[1]" if starting at body.
+          // So if parts[0] is "body", we use current=document.body and shift.
+          
+          if (parts[0].toLowerCase().startsWith('body')) {
+             parts.shift();
+          } else if (parts[0].toLowerCase().startsWith('html')) {
+             parts.shift();
+             if (parts.length > 0 && parts[0].toLowerCase().startsWith('body')) parts.shift();
+          }
+
+          for (const part of parts) {
+             // part is like "div[2]" or "span" (implies [1])
+             const match = part.match(/^([a-z0-9-_]+)(?:[(d+)])?$/i);
+             if (!match) {
+               current = null;
+               break;
+             }
+             
+             const tagName = match[1].toUpperCase();
+             const index = match[2] ? parseInt(match[2], 10) : 1;
+             
+             // Find nth child with this tag
+             let count = 0;
+             let found = null;
+             const children = current.children; // .children only includes Elements (skips text), which matches XPath element indexing usually?
+             // Wait, XPath "div[2]" means 2nd child that IS a div.
+             // .children is all elements.
+             
+             for (let i = 0; i < children.length; i++) {
+               const child = children[i];
+               if (child.tagName === tagName) {
+                 count++;
+                 if (count === index) {
+                   found = child;
+                   break;
+                 }
+               }
+             }
+             
+             if (!found) {
+               current = null; 
+               break;
+             }
+             current = found;
+          }
+          
+          if (current) result = current;
+          
+        } catch(e) {
+          console.warn('Manual XPath traversal failed:', e);
+        }
+      }
+
+      return result;
+    }
+
+    // --- Helper: Get XPath for Element (Reverse) ---
+    function getXPathForElement(element) {
+      if (element.id !== '') return 'id("' + element.id + '")';
+      if (element === document.body) return element.tagName.toLowerCase();
+
+      let ix = 0;
+      const siblings = element.parentNode ? element.parentNode.childNodes : [];
+      
+      for (let i = 0; i < siblings.length; i++) {
+        const sibling = siblings[i];
+        if (sibling === element) {
+          return getXPathForElement(element.parentNode) + '/' + element.tagName.toLowerCase() + '[' + (ix + 1) + ']';
+        }
+        if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
+          ix++;
+        }
+      }
+    }
+
+    // --- Position-safe class helpers ---
+    // position:relative is only needed for "static" elements so that
+    // z-index and ::before labels work.  Fixed/sticky/absolute elements
+    // already support z-index, so overriding their position breaks layout
+    // (e.g. a fixed header collapses into normal flow and disappears).
+    var REPOSITION_ATTR = 'data-interactive-reposition';
+
+    function addInteractiveClass(el, cls) {
+      var needsReposition = window.getComputedStyle(el).position === 'static';
+      el.classList.add(cls);
+      if (needsReposition) {
+        el.setAttribute(REPOSITION_ATTR, '');
+      }
+    }
+
+    function removeInteractiveClass(el, cls) {
+      el.classList.remove(cls);
+      // Only remove reposition attr if no other interactive class remains
+      if (!el.classList.contains(HOVER_CLASS) &&
+          !el.classList.contains(SELECTED_CLASS) &&
+          !el.classList.contains(CONNECTED_CLASS)) {
+        el.removeAttribute(REPOSITION_ATTR);
+      }
+    }
+
+    // --- CSS Injection ---
+    function injectConnectStyles() {
+      if (document.getElementById(CONNECT_STYLE_ID)) return;
+
+      const css = `
+        /* Cursor change for the whole page */
+        body[data-mode="connect"] {
+          cursor: crosshair !important;
+        }
+
+        /* position:relative only for originally-static elements (via JS attr) */
+        [${REPOSITION_ATTR}] {
+          position: relative;
+        }
+
+        /* Connected State - Blue/Green (Persistent) */
+        .${CONNECTED_CLASS} {
+          outline: 2px dashed #4287f5 !important;
+          z-index: 9990; 
+        }
+
+        /* Hover State - Blurple */
+        .${HOVER_CLASS} {
+          outline: 2px solid #5E56E7 !important;
+          z-index: 9999;
+        }
+
+        /* Selected State - Same Blurple (Persistent) */
+        .${SELECTED_CLASS} {
+          outline: 2px solid #5E56E7 !important;
+          box-shadow: 0 0 0 2px #5E56E7 !important;
+          z-index: 10000;
+        }
+
+        /* Label Tag */
+        .${CONNECTED_CLASS}::before,
+        .${HOVER_CLASS}::before,
+        .${SELECTED_CLASS}::before {
+          content: attr(data-interactive-label);
+          position: absolute;
+          top: -24px;
+          left: -2px;
+          padding: 2px 8px;
+          font-size: 12px !important;
+          line-height: 1 !important;
+          height: auto !important;
+          display: block !important;
+          font-family: monospace !important;
+          font-weight: normal !important;
+          font-style: normal !important;
+          text-transform: none !important;
+          letter-spacing: normal !important;
+          border-radius: 4px 4px 0 0;
+          white-space: nowrap;
+          pointer-events: none;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+          z-index: 10001;
+        }
+
+        /* Specific Colors for Labels */
+        .${CONNECTED_CLASS}::before {
+          background: #4287f5;
+          color: white;
+          content: "Connected"; 
+        }
+        
+        .${HOVER_CLASS}::before,
+        .${SELECTED_CLASS}::before {
+          background: #5E56E7;
+          color: white;
+        }
+      `;
+
+      const style = document.createElement('style');
+      style.id = CONNECT_STYLE_ID;
+      style.textContent = css;
+      document.head.appendChild(style);
+    }
+
+    function injectRunStyles() {
+      if (document.getElementById(RUN_STYLE_ID)) return;
+      const style = document.createElement('style');
+      style.id = RUN_STYLE_ID;
+      style.textContent = `
+        .${RUN_LINK_CLASS} { cursor: pointer !important; }
+        .${HOTSPOT_CLASS} {
+          outline: 2px dashed rgba(66, 135, 245, 0.7) !important;
+          outline-offset: 2px;
+          animation: hotspot-pulse 2s ease-in-out infinite;
+        }
+        @keyframes hotspot-pulse {
+          0%, 100% { outline-color: rgba(66, 135, 245, 0.5); }
+          50% { outline-color: rgba(66, 135, 245, 0.9); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // --- Core Logic: Connect Mode ---
+    function updateConnectMode() {
+      document.body.setAttribute('data-mode', 'connect');
+      injectConnectStyles();
+      highlightConnections();
+      
+      // Clear run mode artifacts
+      document.querySelectorAll('.' + RUN_LINK_CLASS).forEach(el => el.classList.remove(RUN_LINK_CLASS));
+    }
+
+    function highlightConnections() {
+      // Clear existing
+      document.querySelectorAll('.' + CONNECTED_CLASS).forEach(el => {
+         removeInteractiveClass(el, CONNECTED_CLASS);
+         el.removeAttribute('data-interactive-label');
+      });
+
+      // Highlight based on current state links? 
+      // Or ALL links for this screen? Usually all links for this screen logic.
+      // But we receive potentially filtered links. 
+      // For now, let's use all links passed to us.
+      if (!links) {
+        return;
+      }
+
+      links.forEach(link => {
+        // Show all connections in Connect mode, regardless of state
+        // if (link.state !== '1') return;
+
+        try {
+           let safeXpath = link.xpath;
+           if (!safeXpath.startsWith('/') && !safeXpath.startsWith('id(')) {
+             safeXpath = '//' + safeXpath;
+           }
+
+           const element = getElementByXPath(safeXpath);
+           if (element) {
+             addInteractiveClass(element, CONNECTED_CLASS);
+             element.setAttribute('data-interactive-label', 'Connected');
+           }
+        } catch (e) {}
+      });
+    }
+    
+    function handleConnectHover(e) {
+      if (mode !== 'connect') return;
+      // Don't show hover borders when interactions are paused or element is selected
+      if (!interactive || selectedElement) return;
+      
+      // Cleanup previous hover
+      document.querySelectorAll('.' + HOVER_CLASS).forEach(el => {
+         removeInteractiveClass(el, HOVER_CLASS);
+         el.removeAttribute('data-interactive-label');
+      });
+
+      const target = e.target;
+      if (target === document.body || target === document.documentElement) return;
+
+      // Skip page-level wrappers — they create stacking contexts that
+      // cover fixed/sticky headers and footers.
+      var SKIP_HOVER = { MAIN:1, BODY:1, HTML:1 };
+      if (SKIP_HOVER[target.tagName]) return;
+
+      // Don't hover if selected
+      if (target.classList.contains(SELECTED_CLASS)) return;
+
+      addInteractiveClass(target, HOVER_CLASS);
+      
+      // Determine label
+      let label = 'Select';
+      if (target.classList.contains(CONNECTED_CLASS)) label = 'Connected';
+      
+      target.setAttribute('data-interactive-label', label);
+    }
+
+    function handleConnectClick(e) {
+      if (mode !== 'connect') return;
+
+      // Don't intercept clicks originating from contentEditable elements.
+      // When editing text in a <button> or <a>, pressing Space fires a
+      // synthetic click; we must still preventDefault() to block form
+      // submission / navigation, but skip the selection logic so the
+      // space character is inserted normally.
+      const target = e.target;
+      if (target && (target.isContentEditable || target.closest?.('[contenteditable]'))) {
+        e.preventDefault();
+        return;
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      if (!interactive) return;
+
+      // If an element is already selected, deselect it (click anywhere to dismiss)
+      if (selectedElement) {
+        removeInteractiveClass(selectedElement, SELECTED_CLASS);
+        selectedElement.removeAttribute('data-interactive-label');
+        selectedElement = null;
+        window.parent.postMessage({ type: 'elementDeselected' }, '*');
+        return;
+      }
+
+      // target is already declared above
+      
+      // Toggle selection
+      if (target.classList.contains(SELECTED_CLASS)) {
+        // Deselect
+        removeInteractiveClass(target, SELECTED_CLASS);
+        target.removeAttribute('data-interactive-label');
+        selectedElement = null;
+        
+        window.parent.postMessage({
+          type: 'elementDeselected' 
+        }, '*');
+
+        // Re-apply hover if mouse is still there?
+      } else {
+        // Clear previous selection
+        if (selectedElement) {
+           removeInteractiveClass(selectedElement, SELECTED_CLASS);
+           selectedElement.removeAttribute('data-interactive-label');
+        }
+
+        // Skip page-level container wrappers — clicking on padding of a
+        // <main> or <body> selects the container which produces a useless
+        // overlay. We intentionally keep HEADER, FOOTER, NAV, SECTION
+        // etc. selectable since users may want to edit them directly.
+        var SKIP_TAGS = { MAIN:1, BODY:1, HTML:1 };
+        if (SKIP_TAGS[target.tagName] && target.children.length > 0) {
+          selectedElement = null;
+          return;
+        }
+        
+        selectedElement = target;
+        addInteractiveClass(selectedElement, SELECTED_CLASS);
+        selectedElement.setAttribute('data-interactive-label', 'Selected');
+        
+        // Remove hover class to avoid double border
+        removeInteractiveClass(selectedElement, HOVER_CLASS);
+
+        // Send to parent
+        const xpath = getXPathForElement(selectedElement);
+        const rect = selectedElement.getBoundingClientRect();
+
+        // Check if clicked element matches any stored link (resolve stored xpaths to compare DOM nodes)
+        let storedXpath = null;
+        if (links && links.length > 0) {
+          for (const link of links) {
+            try {
+              let safeXpath = link.xpath;
+              if (!safeXpath.startsWith('/') && !safeXpath.startsWith('id(')) {
+                safeXpath = '//' + safeXpath;
+              }
+              const el = getElementByXPath(safeXpath);
+              if (el === selectedElement) {
+                storedXpath = link.xpath;
+                break;
+              }
+            } catch (err) {}
+          }
+        }
+
+        window.parent.postMessage({
+          type: 'elementClicked',
+          payload: { 
+            xpath: storedXpath || xpath,
+            tagName: selectedElement.tagName,
+            text: (selectedElement.textContent || '').substring(0, 100),
+            attributes: Array.from(selectedElement.attributes).map(a => a.name + '="' + a.value + '"').join(' '),
+            outerHTML: (selectedElement.outerHTML || '').substring(0, 500),
+            hasBackgroundImage: !!(selectedElement.style && selectedElement.style.backgroundImage && selectedElement.style.backgroundImage.includes('url(')),
+            rect: {
+              x: rect.x,
+              y: rect.y,
+              width: rect.width,
+              height: rect.height,
+              top: rect.top,
+              right: rect.right,
+              bottom: rect.bottom,
+              left: rect.left
+            }
+          }
+        }, '*');
+      }
+    }
+
+    // --- Core Logic: Run Mode ---
+    function updateRunMode() {
+      document.body.removeAttribute('data-mode');
+      injectRunStyles();
+      addRunInteractivity();
+      
+      // Clear connect mode artifacts
+      document.querySelectorAll('.' + HOVER_CLASS).forEach(el => {
+          removeInteractiveClass(el, HOVER_CLASS);
+          el.removeAttribute('data-interactive-label');
+      });
+       document.querySelectorAll('.' + SELECTED_CLASS).forEach(el => {
+          removeInteractiveClass(el, SELECTED_CLASS);
+          el.removeAttribute('data-interactive-label');
+      });
+      document.querySelectorAll('.' + CONNECTED_CLASS).forEach(el => {
+          removeInteractiveClass(el, CONNECTED_CLASS);
+          el.removeAttribute('data-interactive-label');
+      });
+    }
+
+    // Timer handle for pending hotspot scans — ensures only one scan is active
+    var _hotspotTimer = null;
+
+    function addRunInteractivity(retryCount) {
+      if (!links) return;
+      retryCount = retryCount || 0;
+
+      // Cancel any pending retry to prevent overlapping scans
+      if (_hotspotTimer) {
+        clearTimeout(_hotspotTimer);
+        _hotspotTimer = null;
+      }
+      
+      // 1. Clear existing
+      document.querySelectorAll('.' + RUN_LINK_CLASS).forEach(el => {
+        el.classList.remove(RUN_LINK_CLASS);
+        el.classList.remove(HOTSPOT_CLASS);
+      });
+
+      // 2. Add highlights
+      var foundCount = 0;
+      for (const link of links) {
+        const isExact = (link.state === currentState);
+        const isDefault = (link.state === '1');
+        if (!isExact && !isDefault) continue;
+
+        try {
+          let safeXpath = link.xpath;
+          if (!safeXpath.startsWith('/') && !safeXpath.startsWith('id(')) {
+            safeXpath = '//' + safeXpath;
+          }
+          const el = getElementByXPath(safeXpath);
+          if (el) {
+            el.classList.add(RUN_LINK_CLASS);
+            if (hotspotsVisible) el.classList.add(HOTSPOT_CLASS);
+            foundCount++;
+          }
+        } catch (err) {}
+      }
+
+
+
+      // Retry with increasing delays if we have links but couldn't find elements
+      if (links.length > 0 && foundCount === 0 && retryCount < 5) {
+        var delays = [100, 200, 400, 600, 1000];
+        _hotspotTimer = setTimeout(function() {
+          _hotspotTimer = null;
+          addRunInteractivity(retryCount + 1);
+        }, delays[retryCount]);
+      }
+    }
+
+    function toggleHotspots(show) {
+      hotspotsVisible = show;
+      document.querySelectorAll('.' + RUN_LINK_CLASS).forEach(el => {
+        if (show) el.classList.add(HOTSPOT_CLASS);
+        else el.classList.remove(HOTSPOT_CLASS);
+      });
+    }
+
+    function handleRunClick(e) {
+      if (mode !== 'run') return;
+      
+      // Prevent default navigation for all links
+      const anchor = e.target.closest('a');
+      if (anchor) {
+        e.preventDefault();
+      }
+
+      if (!links || links.length === 0) return;
+
+      let bestLink = null;
+      let bestPriority = 0;
+
+      for (const link of links) {
+        const isExact = (link.state === currentState);
+        const isDefault = (link.state === '1');
+        if (!isExact && !isDefault) continue;
+
+        try {
+          let safeXpath = link.xpath;
+          if (!safeXpath.startsWith('/') && !safeXpath.startsWith('id(')) {
+            safeXpath = '//' + safeXpath;
+          }
+          const el = getElementByXPath(safeXpath);
+          
+          if (el && (el === e.target || el.contains(e.target))) {
+            const priority = isExact ? 2 : 1;
+            if (priority > bestPriority) {
+              bestLink = link;
+              bestPriority = priority;
+            }
+          }
+        } catch (err) {
+            console.error('Error checking link:', link, err);
+        }
+      }
+
+      if (bestLink) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.parent.postMessage({
+          type: 'navigate',
+          payload: {
+            targetScreenId: bestLink.targetScreenId,
+            transition: bestLink.transition
+          }
+        }, '*');
+      }
+    }
+
+    // --- Main Event Dispatcher ---
+    function onMouseOver(e) {
+      if (mode === 'connect') handleConnectHover(e);
+    }
+
+    function onClick(e) {
+      // Notify parent of any click inside the iframe (used to dismiss
+      // the welcome message — iframe clicks don't bubble to parent DOM)
+      window.parent.postMessage({ type: 'iframeClicked' }, '*');
+      if (mode === 'connect') handleConnectClick(e);
+      else if (mode === 'run') handleRunClick(e);
+    }
+
+    function onDblClick(e) {
+      if (mode !== 'connect' || !interactive) return;
+
+      var target = e.target;
+      if (!target || target === document.body || target === document.documentElement) return;
+
+      // Only trigger for text-editable elements
+      if (!TEXT_EDITABLE_TAGS[target.tagName]) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var xpath = getXPathForElement(target);
+
+      // Check if clicked element matches a stored link xpath
+      var storedXpath = null;
+      if (links && links.length > 0) {
+        for (var i = 0; i < links.length; i++) {
+          try {
+            var safeXpath = links[i].xpath;
+            if (!safeXpath.startsWith('/') && !safeXpath.startsWith('id(')) {
+              safeXpath = '//' + safeXpath;
+            }
+            if (getElementByXPath(safeXpath) === target) {
+              storedXpath = links[i].xpath;
+              break;
+            }
+          } catch (err) {}
+        }
+      }
+
+      // Tell parent to go directly into text edit mode
+      window.parent.postMessage({
+        type: 'textEditRequested',
+        payload: { xpath: storedXpath || xpath }
+      }, '*');
+    }
+
+    // --- HTML Serialization (used by text edit and image replace) ---
+    function getEditedHtml() {
+      const clone = document.documentElement.cloneNode(true);
+
+      // 1. Remove contenteditable attributes
+      clone.querySelectorAll('[contenteditable]').forEach(function(e) {
+        e.removeAttribute('contenteditable');
+        e.removeAttribute('spellcheck');
+      });
+
+      // 2. Remove injected script/style elements
+      clone.querySelectorAll('script[data-stitch-injected]').forEach(function(e) {
+        e.remove();
+      });
+      clone.querySelectorAll('style[data-stitch-injected]').forEach(function(e) {
+        e.remove();
+      });
+      // Remove prototype edit/run mode style tags by ID
+      var modeStyle = clone.querySelector('#interactive-mode-styles');
+      if (modeStyle) modeStyle.remove();
+      var runStyle = clone.querySelector('#prototype-run-styles');
+      if (runStyle) runStyle.remove();
+
+      // 3. Remove prototype interactive classes and attributes
+      var protoClasses = ['interactive-selected', 'interactive-connected',
+        'interactive-hover', 'interactive-active', 'prototype-hotspot'];
+      protoClasses.forEach(function(cls) {
+        clone.querySelectorAll('.' + cls).forEach(function(e) {
+          e.classList.remove(cls);
+        });
+      });
+      // Also strip from body
+      clone.querySelector('body')?.classList.remove('interactive-active');
+      // Remove data-interactive-label and data-interactive-reposition attributes
+      clone.querySelectorAll('[data-interactive-label]').forEach(function(e) {
+        e.removeAttribute('data-interactive-label');
+      });
+      clone.querySelectorAll('[' + REPOSITION_ATTR + ']').forEach(function(e) {
+        e.removeAttribute(REPOSITION_ATTR);
+      });
+
+      // 4. Remove editing highlight inline styles
+      clone.querySelectorAll('[style]').forEach(function(e) {
+        e.style.outline = '';
+        e.style.outlineOffset = '';
+        e.style.cursor = '';
+        if (!e.getAttribute('style')?.trim()) {
+          e.removeAttribute('style');
+        }
+      });
+
+      return '<!DOCTYPE html>' + clone.outerHTML;
+    }
+
+    // --- Message Listener ---
+    function handleMessage(event) {
+      if (!event.data || typeof event.data !== 'object') return;
+      const { type, payload } = event.data;
+      
+      if (type === 'setMode') {
+        const newMode = payload.mode; // 'run' or 'connect' (mapped from 'edit' -> 'connect')
+        if (newMode && newMode !== mode) {
+          mode = newMode;
+          if (mode === 'connect') updateConnectMode();
+          else updateRunMode();
+        }
+      } else if (type === 'setState') {
+        const newStateId = payload?.stateId;
+        if (newStateId && newStateId !== currentState) {
+          currentState = newStateId;
+          if (mode === 'run') updateRunMode();
+        }
+      } else if (type === 'updateLinks') {
+         // Debounce link updates to prevent rapid broadcasts from
+         // clearing and re-scanning hotspots repeatedly
+         links = payload.links || [];
+         if (window.__updateLinksTimer) clearTimeout(window.__updateLinksTimer);
+         window.__updateLinksTimer = setTimeout(function() {
+           window.__updateLinksTimer = null;
+           if (mode === 'run') updateRunMode();
+           else updateConnectMode();
+         }, 50);
+      } else if (type === 'showHotspots') {
+         toggleHotspots(!!payload?.show);
+      } else if (type === 'clearSelection') {
+         if (selectedElement) {
+            removeInteractiveClass(selectedElement, SELECTED_CLASS);
+            selectedElement.removeAttribute('data-interactive-label');
+            selectedElement = null;
+         }
+      } else if (type === 'enableTextEdit') {
+         // --- Direct text editing ---
+         const xpath = payload?.xpath;
+         if (!xpath) return;
+         let safeXpath = xpath;
+         if (!safeXpath.startsWith('/') && !safeXpath.startsWith('id(')) {
+           safeXpath = '//' + safeXpath;
+         }
+         const el = getElementByXPath(safeXpath);
+         if (!el || !(el instanceof HTMLElement)) return;
+
+         // Track the element being edited
+         let textEditElement = el;
+
+         // Make editable
+         textEditElement.setAttribute('contenteditable', 'true');
+         textEditElement.setAttribute('spellcheck', 'false');
+         textEditElement.style.outline = '2px solid #4287f5';
+         textEditElement.style.outlineOffset = '2px';
+         textEditElement.style.cursor = 'text';
+         textEditElement.focus();
+
+         // Select all text so user can start typing immediately
+         const range = document.createRange();
+         range.selectNodeContents(textEditElement);
+         const sel = window.getSelection();
+         if (sel) {
+           sel.removeAllRanges();
+           sel.addRange(range);
+         }
+
+         // getEditedHtml is defined at the outer scope
+
+         // Debounce text extraction to avoid O(N) DOM cloning on every keystroke
+         let textEditTimeout;
+         function sendHtml() {
+           window.parent.postMessage({
+             type: 'textChanged',
+             payload: { html: getEditedHtml() }
+           }, '*');
+         }
+         function onTextInput() {
+           clearTimeout(textEditTimeout);
+           textEditTimeout = setTimeout(sendHtml, 300);
+         }
+
+         // Cleanup on blur
+         function onTextBlur() {
+           // Flush any pending debounced update and send final text
+           clearTimeout(textEditTimeout);
+           sendHtml();
+
+           // Cleanup
+           textEditElement.removeAttribute('contenteditable');
+           textEditElement.removeAttribute('spellcheck');
+           textEditElement.style.outline = '';
+           textEditElement.style.outlineOffset = '';
+           textEditElement.style.cursor = '';
+           textEditElement.removeEventListener('input', onTextInput);
+           textEditElement.removeEventListener('blur', onTextBlur);
+
+           // Notify parent that text editing ended
+           window.parent.postMessage({
+             type: 'textEditEnded'
+           }, '*');
+         }
+
+         textEditElement.addEventListener('input', onTextInput);
+         textEditElement.addEventListener('blur', onTextBlur);
+
+         // Store cleanup for disableTextEdit message
+         window.__stitchTextEditCleanup = function() {
+           textEditElement.removeAttribute('contenteditable');
+           textEditElement.removeAttribute('spellcheck');
+           textEditElement.style.outline = '';
+           textEditElement.style.outlineOffset = '';
+           textEditElement.style.cursor = '';
+           textEditElement.removeEventListener('input', onTextInput);
+           textEditElement.removeEventListener('blur', onTextBlur);
+           textEditElement.blur();
+         };
+      } else if (type === 'disableTextEdit') {
+         if (window.__stitchTextEditCleanup) {
+           window.__stitchTextEditCleanup();
+           window.__stitchTextEditCleanup = null;
+         }
+      } else if (type === 'replaceImage') {
+         // --- Image replacement ---
+         const xpath = payload?.xpath;
+         const newSrc = payload?.src;
+         if (!xpath || !newSrc) return;
+         let safeXpath = xpath;
+         if (!safeXpath.startsWith('/') && !safeXpath.startsWith('id(')) {
+           safeXpath = '//' + safeXpath;
+         }
+         const imgEl = getElementByXPath(safeXpath);
+         if (!imgEl || !(imgEl instanceof HTMLElement)) return;
+
+         // Swap image source
+         const tag = imgEl.tagName.toLowerCase();
+         if (tag === 'img') {
+           imgEl.setAttribute('src', newSrc);
+         } else {
+           // Background image element
+           imgEl.style.backgroundImage = 'url("' + newSrc + '")';
+         }
+
+         // Send updated HTML to parent for persistence
+         window.parent.postMessage({
+           type: 'textChanged',
+           payload: { html: getEditedHtml() }
+         }, '*');
+      } else if (type === 'setInteractive') {
+         interactive = !!payload?.interactive;
+         if (!interactive) {
+           // Clear hovers when disabling
+           document.querySelectorAll('.' + HOVER_CLASS).forEach(el => {
+             removeInteractiveClass(el, HOVER_CLASS);
+             el.removeAttribute('data-interactive-label');
+           });
+         }
+       }
+    }
+
+    window.addEventListener('message', handleMessage);
+
+    // --- Initialization ---
+    document.addEventListener('mouseover', onMouseOver, true);
+    document.addEventListener('click', onClick, true); // Capture phase to prevent default
+    document.addEventListener('dblclick', onDblClick, true);
+
+    // Esc key to deselect in connect mode + space key fix for contentEditable buttons
+    function onKeyDown(e) {
+      // Fix: <button> and <a> elements have a native activation behavior on
+      // Space (fires a click). When contentEditable is active on such elements,
+      // the browser prioritises activation over text insertion. Prevent the
+      // native activation and manually insert the space character instead.
+      if (e.key === ' ' && !e.repeat) {
+        const t = e.target;
+        if (t && t.isContentEditable) {
+          e.preventDefault();
+          document.execCommand('insertText', false, ' ');
+          return;
+        }
+      }
+
+      if (e.key === 'Escape' && mode === 'connect' && selectedElement) {
+        removeInteractiveClass(selectedElement, SELECTED_CLASS);
+        selectedElement.removeAttribute('data-interactive-label');
+        selectedElement = null;
+        window.parent.postMessage({ type: 'elementDeselected' }, '*');
+      }
+    }
+    document.addEventListener('keydown', onKeyDown, true);
+
+    // Clear hover borders when mouse leaves the iframe entirely
+    function onMouseLeave() {
+      document.querySelectorAll('.' + HOVER_CLASS).forEach(el => {
+        removeInteractiveClass(el, HOVER_CLASS);
+        el.removeAttribute('data-interactive-label');
+      });
+    }
+    document.addEventListener('mouseleave', onMouseLeave);
+
+    // Cleanup function
+    window.__PROTOTYPE_V2_CLEANUP__ = function() {
+      document.removeEventListener('mouseover', onMouseOver, true);
+      document.removeEventListener('click', onClick, true);
+      document.removeEventListener('dblclick', onDblClick, true);
+      document.removeEventListener('keydown', onKeyDown, true);
+      document.removeEventListener('mouseleave', onMouseLeave);
+      window.removeEventListener('message', handleMessage);
+      // Remove styles
+      const connectStyle = document.getElementById(CONNECT_STYLE_ID);
+      if (connectStyle) connectStyle.remove();
+      const runStyle = document.getElementById(RUN_STYLE_ID);
+      if (runStyle) runStyle.remove();
+    };
+
+    // Start in default mode
+    function init() {
+      if (!document.body) {
+        // Should not happen if script is at end of body, but just in case
+        console.warn('PrototypeV2: document.body not ready during init');
+        return;
+      }
+      if (mode === 'run') updateRunMode();
+      else updateConnectMode();
+
+      // Notify parent that script is ready to receive messages (links, mode, state)
+      window.parent.postMessage({ type: 'iframe_heartbeat' }, '*');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+  })();
+
+      </script><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}[type='text'],input:where(:not([type])),[type='email'],[type='url'],[type='password'],[type='number'],[type='date'],[type='datetime-local'],[type='month'],[type='search'],[type='tel'],[type='time'],[type='week'],[multiple],textarea,select{-webkit-appearance:none;appearance:none;background-color:#fff;border-color:#6b7280;border-width:1px;border-radius:0px;padding-top:0.5rem;padding-right:0.75rem;padding-bottom:0.5rem;padding-left:0.75rem;font-size:1rem;line-height:1.5rem;--tw-shadow:0 0 #0000;}[type='text']:focus, input:where(:not([type])):focus, [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus{outline:2px solid transparent;outline-offset:2px;--tw-ring-inset:var(--tw-empty,/*!*/ /*!*/);--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:#2563eb;--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);border-color:#2563eb}input::placeholder,textarea::placeholder{color:#6b7280;opacity:1}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-date-and-time-value{min-height:1.5em;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-top:0;padding-bottom:0}select{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");background-position:right 0.5rem center;background-repeat:no-repeat;background-size:1.5em 1.5em;padding-right:2.5rem;print-color-adjust:exact}[multiple],[size]:where(select:not([size="1"])){background-image:initial;background-position:initial;background-repeat:unset;background-size:initial;padding-right:0.75rem;print-color-adjust:unset}[type='checkbox'],[type='radio']{-webkit-appearance:none;appearance:none;padding:0;print-color-adjust:exact;display:inline-block;vertical-align:middle;background-origin:border-box;-webkit-user-select:none;user-select:none;flex-shrink:0;height:1rem;width:1rem;color:#2563eb;background-color:#fff;border-color:#6b7280;border-width:1px;--tw-shadow:0 0 #0000}[type='checkbox']{border-radius:0px}[type='radio']{border-radius:100%}[type='checkbox']:focus,[type='radio']:focus{outline:2px solid transparent;outline-offset:2px;--tw-ring-inset:var(--tw-empty,/*!*/ /*!*/);--tw-ring-offset-width:2px;--tw-ring-offset-color:#fff;--tw-ring-color:#2563eb;--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)}[type='checkbox']:checked,[type='radio']:checked{border-color:transparent;background-color:currentColor;background-size:100% 100%;background-position:center;background-repeat:no-repeat}[type='checkbox']:checked{background-image:url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");}@media (forced-colors: active) {[type='checkbox']:checked{-webkit-appearance:auto;appearance:auto}}[type='radio']:checked{background-image:url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");}@media (forced-colors: active) {[type='radio']:checked{-webkit-appearance:auto;appearance:auto}}[type='checkbox']:checked:hover,[type='checkbox']:checked:focus,[type='radio']:checked:hover,[type='radio']:checked:focus{border-color:transparent;background-color:currentColor}[type='checkbox']:indeterminate{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 16 16'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3e%3c/svg%3e");border-color:transparent;background-color:currentColor;background-size:100% 100%;background-position:center;background-repeat:no-repeat;}@media (forced-colors: active) {[type='checkbox']:indeterminate{-webkit-appearance:auto;appearance:auto}}[type='checkbox']:indeterminate:hover,[type='checkbox']:indeterminate:focus{border-color:transparent;background-color:currentColor}[type='file']{background:unset;border-color:inherit;border-width:0;border-radius:0;padding:0;font-size:unset;line-height:inherit}[type='file']:focus{outline:1px solid ButtonText;outline:1px auto -webkit-focus-ring-color}.pointer-events-none{pointer-events:none}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.bottom-0{bottom:0px}.bottom-\[10\%\]{bottom:10%}.left-3\.5{left:0.875rem}.left-4{left:1rem}.left-\[-4px\]{left:-4px}.left-\[8\%\]{left:8%}.right-3\.5{right:0.875rem}.right-\[5\%\]{right:5%}.top-0{top:0px}.top-1\/2{top:50%}.top-\[10\%\]{top:10%}.z-10{z-index:10}.-mt-1{margin-top:-0.25rem}.mb-1{margin-bottom:0.25rem}.mb-3{margin-bottom:0.75rem}.mb-md{margin-bottom:16px}.mb-xl{margin-bottom:40px}.ml-1{margin-left:0.25rem}.ml-2\.5{margin-left:0.625rem}.mt-xl{margin-top:40px}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-12{height:3rem}.h-2{height:0.5rem}.h-4{height:1rem}.h-48{height:12rem}.h-\[884px\]{height:884px}.h-full{height:100%}.w-1\.5{width:0.375rem}.w-12{width:3rem}.w-2{width:0.5rem}.w-4{width:1rem}.w-\[1px\]{width:1px}.w-full{width:100%}.max-w-sm{max-width:24rem}.max-w-xs{max-width:20rem}.origin-left{transform-origin:left}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-rotate-90{--tw-rotate:-90deg;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.scale-100{--tw-scale-x:1;--tw-scale-y:1;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-pointer{cursor:pointer}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-x-8{column-gap:2rem}.gap-y-2{row-gap:0.5rem}.space-x-2 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.5rem * var(--tw-space-x-reverse));margin-left:calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-3 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.75rem * var(--tw-space-x-reverse));margin-left:calc(0.75rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-4 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(1rem * var(--tw-space-x-reverse));margin-left:calc(1rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-8 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(2rem * var(--tw-space-x-reverse));margin-left:calc(2rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.space-y-lg > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(24px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(24px * var(--tw-space-y-reverse))}.space-y-xs > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(4px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(4px * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:0.75rem}.rounded-sm{border-radius:0.125rem}.rounded-xl{border-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-t{border-top-width:1px}.border-primary\/10{border-color:rgb(250 204 21 / 0.1)}.border-primary\/20{border-color:rgb(250 204 21 / 0.2)}.border-transparent{border-color:transparent}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-white\/5{border-color:rgb(255 255 255 / 0.05)}.border-white\/\[0\.05\]{border-color:rgb(255 255 255 / 0.05)}.bg-background{--tw-bg-opacity:1;background-color:rgb(19 19 19 / var(--tw-bg-opacity, 1))}.bg-primary{--tw-bg-opacity:1;background-color:rgb(250 204 21 / var(--tw-bg-opacity, 1))}.bg-primary\/10{background-color:rgb(250 204 21 / 0.1)}.bg-primary\/5{background-color:rgb(250 204 21 / 0.05)}.bg-surface-container-lowest{--tw-bg-opacity:1;background-color:rgb(14 14 14 / var(--tw-bg-opacity, 1))}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-white\/20{background-color:rgb(255 255 255 / 0.2)}.bg-white\/\[0\.03\]{background-color:rgb(255 255 255 / 0.03)}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.bg-gradient-to-t{background-image:linear-gradient(to top, var(--tw-gradient-stops))}.from-background\/40{--tw-gradient-from:rgb(19 19 19 / 0.4) var(--tw-gradient-from-position);--tw-gradient-to:rgb(19 19 19 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-background\/60{--tw-gradient-from:rgb(19 19 19 / 0.6) var(--tw-gradient-from-position);--tw-gradient-to:rgb(19 19 19 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-primary{--tw-gradient-from:#facc15 var(--tw-gradient-from-position);--tw-gradient-to:rgb(250 204 21 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-primary\/60{--tw-gradient-from:rgb(250 204 21 / 0.6) var(--tw-gradient-from-position);--tw-gradient-to:rgb(250 204 21 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-transparent{--tw-gradient-to:rgb(0 0 0 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), transparent var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-background{--tw-gradient-to:#131313 var(--tw-gradient-to-position)}.to-primary-fixed-dim{--tw-gradient-to:#eec200 var(--tw-gradient-to-position)}.to-transparent{--tw-gradient-to:transparent var(--tw-gradient-to-position)}.bg-cover{background-size:cover}.bg-center{background-position:center}.p-xl{padding:40px}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-lg{padding-left:24px;padding-right:24px}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-xl{padding-top:40px;padding-bottom:40px}.pl-11{padding-left:2.75rem}.pr-12{padding-right:3rem}.pr-4{padding-right:1rem}.pt-1{padding-top:0.25rem}.pt-lg{padding-top:24px}.text-center{text-align:center}.font-body-base{font-family:Geist}.font-headline-md{font-family:Geist}.font-label-sm{font-family:Geist}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[12px\]{font-size:12px}.text-\[13px\]{font-size:13px}.text-\[15px\]{font-size:15px}.text-\[18px\]{font-size:18px}.text-\[20px\]{font-size:20px}.text-\[28px\]{font-size:28px}.text-body-base{font-size:16px;line-height:24px;letter-spacing:0em;font-weight:400}.text-headline-md{font-size:24px;line-height:32px;letter-spacing:-0.01em;font-weight:600}.text-label-sm{font-size:12px;line-height:16px;letter-spacing:0.05em;font-weight:600}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.tracking-\[0\.15em\]{letter-spacing:0.15em}.tracking-\[0\.2em\]{letter-spacing:0.2em}.tracking-\[0\.3em\]{letter-spacing:0.3em}.tracking-tighter{letter-spacing:-0.05em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-on-background{--tw-text-opacity:1;color:rgb(226 226 226 / var(--tw-text-opacity, 1))}.text-on-primary{--tw-text-opacity:1;color:rgb(60 47 0 / var(--tw-text-opacity, 1))}.text-on-surface{--tw-text-opacity:1;color:rgb(226 226 226 / var(--tw-text-opacity, 1))}.text-on-surface-variant{--tw-text-opacity:1;color:rgb(209 198 171 / var(--tw-text-opacity, 1))}.text-on-surface-variant\/70{color:rgb(209 198 171 / 0.7)}.text-on-surface-variant\/80{color:rgb(209 198 171 / 0.8)}.text-outline\/50{color:rgb(154 144 120 / 0.5)}.text-outline\/60{color:rgb(154 144 120 / 0.6)}.text-primary{--tw-text-opacity:1;color:rgb(250 204 21 / var(--tw-text-opacity, 1))}.text-primary\/80{color:rgb(250 204 21 / 0.8)}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-white\/90{color:rgb(255 255 255 / 0.9)}.opacity-60{opacity:0.6}.opacity-80{opacity:0.8}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-1000{transition-duration:1000ms}.duration-300{transition-duration:300ms}.duration-500{transition-duration:500ms}.selection\:bg-primary\/30 *::selection{background-color:rgb(250 204 21 / 0.3)}.selection\:bg-primary\/30::selection{background-color:rgb(250 204 21 / 0.3)}.placeholder\:text-outline\/40::placeholder{color:rgb(154 144 120 / 0.4)}.hover\:border-primary\/40:hover{border-color:rgb(250 204 21 / 0.4)}.hover\:bg-white\/\[0\.06\]:hover{background-color:rgb(255 255 255 / 0.06)}.hover\:text-primary:hover{--tw-text-opacity:1;color:rgb(250 204 21 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:brightness-110:hover{--tw-brightness:brightness(1.1);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.focus\:border-primary\/40:focus{border-color:rgb(250 204 21 / 0.4)}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-1:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-primary\/20:focus{--tw-ring-color:rgb(250 204 21 / 0.2)}.focus\:ring-primary\/40:focus{--tw-ring-color:rgb(250 204 21 / 0.4)}.active\:scale-\[0\.98\]:active{--tw-scale-x:0.98;--tw-scale-y:0.98;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:focus-within .group-focus-within\:text-primary{--tw-text-opacity:1;color:rgb(250 204 21 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:translate-x-1{--tw-translate-x:0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:text-on-surface{--tw-text-opacity:1;color:rgb(226 226 226 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-primary{--tw-text-opacity:1;color:rgb(250 204 21 / var(--tw-text-opacity, 1))}@media (min-width: 1024px){.lg\:flex{display:flex}.lg\:w-\[40\%\]{width:40%}.lg\:w-\[60\%\]{width:60%}.lg\:justify-start{justify-content:flex-start}.lg\:text-left{text-align:left}}@media (min-width: 1280px){.xl\:block{display:block}}</style><style id="prototype-run-styles">
+        .prototype-link-hover { cursor: pointer !important; }
+        .prototype-hotspot {
+          outline: 2px dashed rgba(66, 135, 245, 0.7) !important;
+          outline-offset: 2px;
+          animation: hotspot-pulse 2s ease-in-out infinite;
+        }
+        @keyframes hotspot-pulse {
+          0%, 100% { outline-color: rgba(66, 135, 245, 0.5); }
+          50% { outline-color: rgba(66, 135, 245, 0.9); }
+        }
+      </style></head>
+<body class="bg-background text-on-background font-body-base overflow-hidden h-[884px] selection:bg-primary/30" data-stitch-vh="h-[884px]===h-screen">
+<main class="flex h-full w-full">
+<!-- Left Panel: Immersive Visual Area (60%) -->
+<section class="hidden lg:flex lg:w-[60%] relative h-full overflow-hidden items-center justify-center">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-1000 scale-100" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAp_K6KN9jwTle-ayHVgrMWaRo1Km9cdcBj1O6YUcWzrMU4BJWEOvAiO6KM-8_UmB466HaDvMZtRyfczyh3lCmLlVoBMNDTSUUzEvvVAhSrrRnyMVLMKjdWJZn-8s1fK29qbSpXk_seHF50v6ud16FaIOEU2yTMdfQEfQBylVQbZuu-dyonBMy2bgF8Oyb3TC42FU3g620WAYLMCr4eAbvrHZ9EQvAQvMC_h6xbGlWsoaPaArlW2rNzUzpdl7-NfiPRvLmiDKoIT9qQ&quot;); transform: translate(1.16016px, 0.439453px) scale(1.02);">
+<!-- Sophisticated Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent"></div>
+</div>
+<!-- Minimalist Technical Callouts -->
+<div class="relative z-10 w-full h-full pointer-events-none p-xl">
+<!-- Top Status -->
+<div class="absolute top-[10%] left-[8%] flex items-center space-x-4 animate-float" style="animation-delay: 0s;">
+<div class="w-[1px] h-12 bg-gradient-to-b from-primary/60 to-transparent"></div>
+<div>
+<p class="font-label-sm text-label-sm text-primary/80 uppercase tracking-widest mb-1">Status de Red</p>
+<p class="font-headline-md text-[18px] text-white">OPERACIONAL 100%</p>
+</div>
+</div>
+<!-- Bottom Left Specs -->
+<div class="absolute bottom-[10%] left-[8%] space-y-6 animate-float" style="animation-delay: 2s;">
+<div class="glass-card px-6 py-4 rounded-xl premium-border">
+<div class="flex items-center space-x-3 mb-3">
+<span class="material-symbols-outlined text-primary text-[20px]">verified_user</span>
+<span class="font-label-sm text-label-sm text-white/90">Protocolo de Seguridad G82</span>
+</div>
+<div class="grid grid-cols-2 gap-x-8 gap-y-2 opacity-60">
+<div>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant">Encriptación</p>
+<p class="text-[12px] font-medium text-white">AES-256-GCM</p>
+</div>
+<div>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant">Latencia</p>
+<p class="text-[12px] font-medium text-white">12ms (Global)</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Telemetry Bar -->
+<div class="absolute right-[5%] top-1/2 -translate-y-1/2 h-48 w-[1px] bg-white/10 hidden xl:block">
+<div class="absolute top-0 left-[-4px] w-2 h-2 rounded-full bg-primary tech-glow"></div>
+<div class="absolute bottom-0 left-[-4px] w-2 h-2 rounded-full bg-white/20"></div>
+<p class="absolute -rotate-90 origin-left left-4 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-[0.3em] text-on-surface-variant whitespace-nowrap">Telemetría Avanzada en Tiempo Real</p>
+</div>
+</div>
+</section>
+<!-- Right Panel: Authentication Area (40%) -->
+<section class="w-full lg:w-[40%] h-full bg-background flex flex-col justify-center items-center px-lg py-xl relative overflow-y-auto border-l border-white/5">
+<div class="w-full max-w-sm flex flex-col items-center">
+<!-- Header -->
+<header class="w-full text-center lg:text-left mb-xl">
+<div class="flex items-center justify-center lg:justify-start space-x-3 mb-md">
+<div class="w-12 h-12 bg-primary/10 border border-primary/20 flex items-center justify-center rounded-xl shadow-lg">
+<span class="material-symbols-outlined text-primary font-light text-[28px]" style="font-variation-settings: &#39;FILL&#39; 0, &#39;wght&#39; 200;">precision_manufacturing</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-white text-tracking-enterprise">AutoTaller</h1>
+<p class="text-primary text-[11px] font-label-sm uppercase tracking-[0.2em] -mt-1 opacity-80">Enterprise Management</p>
+</div>
+</div>
+<p class="text-on-surface-variant font-body-base text-body-base max-w-xs leading-relaxed">
+                    Inicie sesión para acceder al ecosistema de gestión técnica y logística de alto rendimiento.
+                </p>
+</header>
+<!-- Login Card -->
+<div class="w-full glass-card p-xl rounded-2xl shadow-2xl transition-all duration-500 hover:border-primary/40">
+<form class="space-y-lg" onsubmit="event.preventDefault();">
+<!-- Email Field -->
+<div class="space-y-xs">
+<label class="font-label-sm text-[13px] text-on-surface-variant/80 ml-1 uppercase tracking-wider" for="email">Identificador Corporativo</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline/50 group-focus-within:text-primary transition-all duration-300 text-[20px]">alternate_email</span>
+<input class="w-full bg-surface-container-lowest border border-white/5 rounded-xl py-3.5 pl-11 pr-4 text-on-surface placeholder:text-outline/40 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all duration-300 font-body-base" id="email" placeholder="usuario@autotaller.com" type="email">
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-xs">
+<label class="font-label-sm text-[13px] text-on-surface-variant/80 ml-1 uppercase tracking-wider" for="password">Clave de Acceso</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline/50 group-focus-within:text-primary transition-all duration-300 text-[20px]">lock_open</span>
+<input class="w-full bg-surface-container-lowest border border-white/5 rounded-xl py-3.5 pl-11 pr-12 text-on-surface placeholder:text-outline/40 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all duration-300 font-body-base" id="password" placeholder="••••••••" type="password">
+<button class="absolute right-3.5 top-1/2 -translate-y-1/2 text-outline/50 hover:text-white transition-colors" onclick="togglePassword()" type="button">
+<span class="material-symbols-outlined text-[20px]" id="eye-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Options -->
+<div class="flex items-center justify-between text-[13px] font-body-base pt-1">
+<label class="flex items-center cursor-pointer group">
+<input class="rounded-sm border-white/10 bg-surface-container-lowest text-primary focus:ring-primary/20 w-4 h-4 transition-all" type="checkbox">
+<span class="ml-2.5 text-on-surface-variant group-hover:text-on-surface transition-colors">Sesión Persistente</span>
+</label>
+<a class="text-on-surface-variant/70 hover:text-primary transition-colors font-medium border-b border-transparent hover:border-primary/40" href="https://app-companion-430619.appspot.com/preview/18199787421807418975?node-id=405ae113934e4771b15bc0f877fc5efd&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.es.cbo59Ky6fb4.O%2Fd%3D1%2Frs%3DAHpOoo8ixM_Yp83fsCuKOI1NguMJAbDjGQ%2Fm%3D__features__#">Recuperar Credenciales</a>
+</div>
+<!-- Action Button -->
+<button class="w-full bg-gradient-to-b from-primary to-primary-fixed-dim text-on-primary font-label-sm text-[15px] py-4 rounded-xl tech-glow hover:brightness-110 active:scale-[0.98] transition-all duration-300 mt-xl flex items-center justify-center space-x-3 group">
+<span class="tracking-wide uppercase font-bold">Iniciar Sesión</span>
+<span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">east</span>
+</button>
+</form>
+<!-- Alternative Methods -->
+<div class="mt-xl pt-lg border-t border-white/5">
+<button class="w-full flex items-center justify-center space-x-3 py-3 bg-white/[0.03] border border-white/[0.05] rounded-xl text-on-surface-variant hover:bg-white/[0.06] hover:text-white transition-all duration-300 group">
+<span class="material-symbols-outlined text-[18px] group-hover:text-primary transition-colors">fingerprint</span>
+<span class="font-label-sm text-[13px] uppercase tracking-widest">Identidad Biométrica</span>
+</button>
+</div>
+</div>
+<!-- Footer Links -->
+<footer class="w-full mt-xl flex flex-col items-center space-y-8">
+<div class="flex space-x-8 text-[12px] text-outline/60 uppercase tracking-widest font-medium">
+<a class="hover:text-primary transition-colors" href="https://app-companion-430619.appspot.com/preview/18199787421807418975?node-id=405ae113934e4771b15bc0f877fc5efd&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.es.cbo59Ky6fb4.O%2Fd%3D1%2Frs%3DAHpOoo8ixM_Yp83fsCuKOI1NguMJAbDjGQ%2Fm%3D__features__#">Privacidad</a>
+<a class="hover:text-primary transition-colors" href="https://app-companion-430619.appspot.com/preview/18199787421807418975?node-id=405ae113934e4771b15bc0f877fc5efd&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.es.cbo59Ky6fb4.O%2Fd%3D1%2Frs%3DAHpOoo8ixM_Yp83fsCuKOI1NguMJAbDjGQ%2Fm%3D__features__#">Términos</a>
+<a class="hover:text-primary transition-colors" href="https://app-companion-430619.appspot.com/preview/18199787421807418975?node-id=405ae113934e4771b15bc0f877fc5efd&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.es.cbo59Ky6fb4.O%2Fd%3D1%2Frs%3DAHpOoo8ixM_Yp83fsCuKOI1NguMJAbDjGQ%2Fm%3D__features__#">Soporte</a>
+</div>
+<div class="flex items-center space-x-2 py-1.5 px-4 bg-primary/5 rounded-full border border-primary/10">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] uppercase tracking-[0.15em] text-primary/80 font-bold">Cloud Infrastructure: Optimal</span>
+</div>
+</footer>
+</div>
+</section>
+</main>
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eye-icon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.textContent = 'visibility_off';
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.textContent = 'visibility';
+        }
+    }
+
+    // High-fidelity subtle parallax
+    document.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 15;
+        const y = (e.clientY / window.innerHeight - 0.5) * 15;
+        const visualArea = document.querySelector('.lg\\:w-\\[60\\%\\].relative div');
+        if (visualArea) {
+            visualArea.style.transform = `translate(${x}px, ${y}px) scale(1.02)`;
+        }
+    });
+</script>
+</body></html>

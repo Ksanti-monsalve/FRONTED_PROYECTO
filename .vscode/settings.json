@@ -1,0 +1,6 @@
+{
+    "livePreview.defaultPreviewPath": "/Index.html",
+    "conventionalCommits.scopes": [
+        "frontend"
+    ]
+}

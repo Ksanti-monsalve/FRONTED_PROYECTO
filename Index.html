@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTallerManager — Elite Concierge Console</title>
+    <!-- Google Fonts: Outfit (Geometric Luxury Sans) & Plus Jakarta Sans (Premium Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Luxury ambient background -->
+    <div class="luxury-bg-mesh"></div>
+    <div class="luxury-scanlines"></div>
+
+    <div class="app-container">
+        
+        <!-- ================= PANEL IZQUIERDO (60%): SHOWROOM DE ESPEJO DE ALTA GAMA ================= -->
+        <section class="visual-panel">
+            <!-- Ambient golden dust particle canvas -->
+            <canvas id="dust-canvas"></canvas>
+
+            <div class="visual-panel-content">
+                <!-- Branding editorial superior -->
+                <div class="editorial-brand">
+                    <span class="brand-tagline">A U T O T A L L E R M A N A G E R &nbsp; — &nbsp; E L I T E &nbsp; C O N C I E R G E</span>
+                </div>
+
+                <!-- Obra de arte central: Sistema de Espejo / Showroom Reflection -->
+                <div class="art-showcase-container">
+                    <div class="art-overlay-gradient"></div>
+                    
+                    <!-- Vehículo Deportivo en Sistema de Espejo -->
+                    <svg class="car-mirror-system" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#C5A059" stop-opacity="0.15" />
+                                <stop offset="50%" stop-color="#D4AF37" stop-opacity="0.85" />
+                                <stop offset="100%" stop-color="#AA7C11" stop-opacity="0.15" />
+                            </linearGradient>
+                            <linearGradient id="mirrorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.35" />
+                                <stop offset="100%" stop-color="#D4AF37" stop-opacity="0.0" />
+                            </linearGradient>
+                            <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="5" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                            <filter id="mirrorBlur" x="-10%" y="-10%" width="120%" height="120%">
+                                <feGaussianBlur stdDeviation="2.5" />
+                            </filter>
+                        </defs>
+
+                        <!-- [1] VEHÍCULO PRINCIPAL (SUPERIOR) -->
+                        <g class="real-car">
+                            <!-- Silueta del auto (Trazo continúo elegante de súper deportivo) -->
+                            <path class="silhouette-path" d="M120,200 
+                                     C140,198 150,195 160,185 
+                                     C175,170 180,150 200,150 
+                                     C220,150 230,175 245,185
+                                     C260,195 280,198 320,198
+                                     L520,198
+                                     C550,198 565,195 580,185
+                                     C595,175 605,150 625,150
+                                     C645,150 650,170 665,185
+                                     C675,195 685,198 710,200
+                                     C725,200 735,192 730,180
+                                     C720,160 710,152 690,145
+                                     C665,136 615,130 590,120
+                                     C550,104 490,75 400,75
+                                     C320,75 270,92 220,110
+                                     C180,124 140,145 110,165
+                                     C95,175 85,188 90,195
+                                     C93,198 105,200 120,200 Z" 
+                                  stroke="url(#goldGrad)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" filter="url(#goldGlow)" />
+                            
+                            <!-- Cabina interior -->
+                            <path class="interior-path" d="M280,113 C320,93 440,83 490,98 C515,105 535,118 545,130 L335,130 C305,130 290,122 280,113 Z" stroke="rgba(212, 175, 55, 0.25)" stroke-width="0.75" stroke-dasharray="3 2" />
+
+                            <!-- Llantas de diseño -->
+                            <circle cx="212" cy="174" r="22" stroke="rgba(197, 160, 89, 0.25)" stroke-width="0.75" />
+                            <circle cx="212" cy="174" r="10" stroke="rgba(197, 160, 89, 0.15)" stroke-width="0.75" />
+                            <circle cx="612" cy="174" r="22" stroke="rgba(197, 160, 89, 0.25)" stroke-width="0.75" />
+                            <circle cx="612" cy="174" r="10" stroke="rgba(197, 160, 89, 0.15)" stroke-width="0.75" />
+                            
+                            <!-- Luces sutiles -->
+                            <path d="M728,182 C726,176 720,174 715,176" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" />
+                            <path d="M91,185 C93,188 97,189 100,187" stroke="#F97316" opacity="0.6" stroke-width="1.5" stroke-linecap="round" />
+                        </g>
+
+                        <!-- [2] LÍNEA DE ESPEJO (LÍNEA DE HORIZONTE DEL SUELO PULIDO) -->
+                        <line x1="80" y1="200" x2="720" y2="200" stroke="url(#goldGrad)" stroke-width="0.75" />
+
+                        <!-- [3] REFLEJO EN EL SUELO (SISTEMA DE ESPEJO INVERTIDO) -->
+                        <g class="mirrored-reflection" filter="url(#mirrorBlur)" style="transform-origin: 400px 200px; transform: scaleY(-1);">
+                            <!-- Copia exacta invertida con degradado de atenuación -->
+                            <path d="M120,200 
+                                     C140,198 150,195 160,185 
+                                     C175,170 180,150 200,150 
+                                     C220,150 230,175 245,185
+                                     C260,195 280,198 320,198
+                                     L520,198
+                                     C550,198 565,195 580,185
+                                     C595,175 605,150 625,150
+                                     C645,150 650,170 665,185
+                                     C675,195 685,198 710,200
+                                     C725,200 735,192 730,180
+                                     C720,160 710,152 690,145
+                                     C665,136 615,130 590,120
+                                     C550,104 490,75 400,75
+                                     C320,75 270,92 220,110
+                                     C180,124 140,145 110,165
+                                     C95,175 85,188 90,195
+                                     C93,198 105,200 120,200 Z" 
+                                  stroke="url(#mirrorGrad)" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                            
+                            <path d="M280,113 C320,93 440,83 490,98 C515,105 535,118 545,130 L335,130 C305,130 290,122 280,113 Z" stroke="url(#mirrorGrad)" stroke-width="0.75" stroke-dasharray="3 2" />
+                            <circle cx="212" cy="174" r="22" stroke="url(#mirrorGrad)" stroke-width="0.75" />
+                            <circle cx="612" cy="174" r="22" stroke="url(#mirrorGrad)" stroke-width="0.75" />
+                        </g>
+                    </svg>
+
+                    <!-- Inscripción artística sutil -->
+                    <div class="art-inscription">
+                        <h3 class="inscription-title">PORSCHE 911 SILHOUETTE</h3>
+                        <p class="inscription-subtitle">Estudio de Reflexión y Diseño Concierge</p>
+                    </div>
+                </div>
+
+                <!-- Footer sutil del panel visual -->
+                <div class="visual-panel-footer">
+                    <span class="footer-note">CALIBRACIÓN MECÁNICA DE PRECISIÓN Y GESTIÓN CONCIERGE AUTOMOTRIZ</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PANEL DERECHO (40%): INICIO DE SESIÓN DE ALTA COSTURA ================= -->
+        <section class="auth-panel">
+            <div class="auth-wrapper">
+                
+                <!-- Encabezado Editorial -->
+                <header class="auth-header">
+                    <!-- Isotipo de Monograma Minimalista AM (Fine Line Art) -->
+                    <div class="monogram-logo-wrapper">
+                        <svg class="monogram-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="45" stroke="rgba(197, 160, 89, 0.2)" stroke-width="0.75" />
+                            <path d="M36 68 L50 28 L64 68" stroke="#C5A059" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M43 48 L50 58 L57 48" stroke="#C5A059" stroke-width="1.0" stroke-linecap="round" stroke-linejoin="round" />
+                            <line x1="40" y1="56" x2="60" y2="56" stroke="rgba(197, 160, 89, 0.35)" stroke-width="0.75" />
+                        </svg>
+                    </div>
+                    <h1 class="app-title">AutoTaller<span>Manager</span></h1>
+                    <p class="app-subtitle">CONCIERGE DE ALTA GAMA</p>
+                </header>
+
+                <!-- Selector de Firmas Rápido (Minimalist Tabs) -->
+                <div class="quick-roles-container">
+                    <span class="quick-roles-title">FIRMAS DE ACCESO REGISTRADAS</span>
+                    <div class="roles-chips">
+                        <button type="button" class="role-chip" data-role="admin" aria-label="Cargar Firma de Administrador">
+                            Administrador
+                        </button>
+                        <button type="button" class="role-chip" data-role="mecanico" aria-label="Cargar Firma de Especialista">
+                            Especialista
+                        </button>
+                        <button type="button" class="role-chip" data-role="recepcionista" aria-label="Cargar Firma de Concierge">
+                            Concierge
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenedor del Login (Ultra Glassmorphism Minimalista) -->
+                <div class="auth-card glass-panel" id="auth-card-element">
+                    <form class="login-form" id="login-form-element" novalidate>
+                        
+                        <!-- Campo 1: Email corporativo (Sleek Underline Input) -->
+                        <div class="input-group" id="email-group">
+                            <div class="input-wrapper">
+                                <span class="input-icon">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                </span>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    placeholder=" " 
+                                    required 
+                                    autocomplete="email"
+                                    aria-required="true"
+                                >
+                                <label for="email" class="input-label">Email Corporativo</label>
+                            </div>
+                            <span class="error-message" id="email-error">Especifica una firma de correo corporativa válida</span>
+                        </div>
+
+                        <!-- Campo 2: Contraseña (Sleek Underline Input) -->
+                        <div class="input-group" id="password-group">
+                            <div class="input-wrapper">
+                                <span class="input-icon">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                </span>
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    name="password" 
+                                    placeholder=" " 
+                                    required 
+                                    autocomplete="current-password"
+                                    aria-required="true"
+                                >
+                                <label for="password" class="input-label">Contraseña</label>
+                                <button type="button" class="btn-toggle-password" id="toggle-password-btn" aria-label="Mostrar contraseña">
+                                    <svg class="eye-icon eye-show" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg class="eye-icon eye-hide hidden" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
+                            <span class="error-message" id="password-error">La contraseña debe tener al menos 6 caracteres</span>
+                        </div>
+
+                        <!-- Opciones: Recordar & Recuperar -->
+                        <div class="form-options">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="remember-me" name="remember">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-label">Mantener firma activa</span>
+                            </label>
+                            <a href="#" class="forgot-password-link" id="forgot-password-btn">Recuperar credencial</a>
+                        </div>
+
+                        <!-- Botón de Envío de Lujo (Polished Bronze Hover) -->
+                        <button type="submit" class="btn-login" id="submit-btn">
+                            <span class="btn-text">Verificar Credenciales</span>
+                            <div class="btn-loader hidden">
+                                <svg class="spinner" viewBox="0 0 50 50">
+                                    <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="3.5"></circle>
+                                </svg>
+                            </div>
+                            <span class="btn-glow-layer"></span>
+                        </button>
+                    </form>
+
+                    <!-- Mensaje de estado (Certificado de Firma Autorizada) -->
+                    <div class="auth-message-box hidden" id="status-message-box">
+                        <div class="message-content">
+                            <span class="message-icon" id="status-icon"></span>
+                            <div class="message-text-group">
+                                <h4 class="message-heading" id="status-title">Firma Autorizada</h4>
+                                <p class="message-desc" id="status-desc">Cargando consola concierge...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pie de página de la consola -->
+                <footer class="auth-footer">
+                    <p class="server-status">
+                        <span class="secure-badge">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            CONEXIÓN PRIVADA POSTGRESQL SECURE
+                        </span>
+                        <span class="latency-status" id="latency-text">Cifrado JWT asimétrico activo</span>
+                    </p>
+                    <p class="copyright">&copy; 2026 AutoTallerManager Enterprise. Todos los derechos reservados.</p>
+                </footer>
+                
+            </div>
+        </section>
+
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="auth-guard.js"></script>
+    <script src="Diseño.js"></script>
+</body>
+</html>
