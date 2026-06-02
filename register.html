@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Cliente — AutoTallerManager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="luxury-bg-mesh"></div>
+
+    <div class="register-container">
+        <div class="register-card">
+            <a href="/Index.html" class="btn-back-link">← Volver al inicio de sesión</a>
+
+            <h1>Registro de Cliente</h1>
+            <p class="subtitle">AutoTallerManager · Elite Concierge</p>
+
+            <div class="page-alert hidden" id="page-message"></div>
+
+            <form id="register-form" novalidate>
+                <div class="section-divider">Datos Personales</div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="nombres">Nombres *</label>
+                        <input type="text" id="nombres" required placeholder="Ingresa tus nombres">
+                    </div>
+                    <div class="form-field">
+                        <label for="apellidos">Apellidos *</label>
+                        <input type="text" id="apellidos" required placeholder="Ingresa tus apellidos">
+                    </div>
+                    <div class="form-field">
+                        <label for="tipo-doc">Tipo de Documento *</label>
+                        <select id="tipo-doc" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="CC">Cédula de Ciudadanía (CC)</option>
+                            <option value="CE">Cédula de Extranjería (CE)</option>
+                            <option value="PA">Pasaporte (PA)</option>
+                            <option value="NIT">NIT</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="num-doc">Número de Documento *</label>
+                        <input type="text" id="num-doc" required placeholder="Número de documento">
+                    </div>
+                    <div class="form-field">
+                        <label for="reg-email">Email *</label>
+                        <input type="email" id="reg-email" required placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="form-field">
+                        <label for="telefono">Teléfono</label>
+                        <input type="tel" id="telefono" placeholder="Número de teléfono">
+                    </div>
+                    <div class="form-field">
+                        <label for="reg-password">Contraseña * (mín. 6 caracteres)</label>
+                        <input type="password" id="reg-password" required placeholder="••••••••">
+                    </div>
+                    <div class="form-field">
+                        <label for="confirm-password">Confirmar Contraseña *</label>
+                        <input type="password" id="confirm-password" required placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="section-divider">Vehículo</div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="marca">Marca *</label>
+                        <select id="marca" required>
+                            <option value="">Cargando marcas...</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="modelo">Modelo *</label>
+                        <select id="modelo" required disabled>
+                            <option value="">Selecciona una marca primero</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="anio">Año *</label>
+                        <input type="number" id="anio" required min="1970" max="2027" placeholder="2023">
+                    </div>
+                    <div class="form-field">
+                        <label for="placa">Placa *</label>
+                        <input type="text" id="placa" required placeholder="ABC123" style="text-transform:uppercase">
+                    </div>
+                    <div class="form-field">
+                        <label for="color">Color</label>
+                        <select id="color">
+                            <option value="">No especificar</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="vin">VIN / Serial (opcional)</label>
+                        <input type="text" id="vin" placeholder="Número de chasis">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-dashboard btn-dashboard-primary" id="submit-btn" style="width:100%;padding:16px;font-size:13px;margin-top:8px;">
+                    <span id="btn-text">Registrarme</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="register.js"></script>
+</body>
+</html>

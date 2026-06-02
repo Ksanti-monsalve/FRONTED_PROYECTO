@@ -1,5 +1,6 @@
 /**
- * Cliente HTTP completo para AutoTallerManager API (ASP.NET Core 8).
+ * Cliente HTTP para AutoTallerManager API (ASP.NET Core 9).
+ * Adaptado al contrato real del backend.
  */
 (function () {
     const TOKEN_KEYS = {
@@ -50,25 +51,36 @@
     }
 
     function extractErrorMessage(status, body) {
-        if (!body || typeof body !== 'object') {
-            return `Error del servidor (${status})`;
-        }
+        if (!body || typeof body !== 'object') return `Error del servidor (${status})`;
         if (body.mensaje) return body.mensaje;
-        if (Array.isArray(body.errores) && body.errores.length > 0) {
-            return body.errores.join('. ');
-        }
+        if (Array.isArray(body.errores) && body.errores.length > 0) return body.errores.join('. ');
         if (body.title) return body.title;
         return `Error del servidor (${status})`;
     }
 
+    /**
+     * Normaliza la respuesta del backend { exito, data: { token, refreshToken, ... } }
+     * al formato que espera saveSession.
+     */
+    function normalizeAuthData(raw) {
+        const d = raw?.data ?? raw ?? {};
+        return {
+            accessToken:   d.token,
+            refreshToken:  d.refreshToken,
+            nombreUsuario: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim() || d.email || 'Usuario',
+            roles:         d.roles || [],
+            expiracion:    d.expiration ?? d.expiracion,
+        };
+    }
+
     function saveSession(tokens, persistent) {
         const storage = persistent ? localStorage : sessionStorage;
-        storage.setItem(TOKEN_KEYS.access, tokens.accessToken);
-        storage.setItem(TOKEN_KEYS.refresh, tokens.refreshToken);
+        storage.setItem(TOKEN_KEYS.access,   tokens.accessToken);
+        storage.setItem(TOKEN_KEYS.refresh,  tokens.refreshToken);
         storage.setItem(TOKEN_KEYS.user, JSON.stringify({
             nombreUsuario: tokens.nombreUsuario,
-            roles: tokens.roles || [],
-            expiracion: tokens.expiracion,
+            roles:         tokens.roles || [],
+            expiracion:    tokens.expiracion,
         }));
         localStorage.setItem(TOKEN_KEYS.persistent, persistent ? '1' : '0');
 
@@ -88,11 +100,7 @@
         const raw = sessionStorage.getItem(TOKEN_KEYS.user)
             || localStorage.getItem(TOKEN_KEYS.user);
         if (!raw) return null;
-        try {
-            return JSON.parse(raw);
-        } catch {
-            return null;
-        }
+        try { return JSON.parse(raw); } catch { return null; }
     }
 
     function isSessionExpired(user) {
@@ -104,10 +112,7 @@
     function isAuthenticated() {
         if (!getAccessToken()) return false;
         const user = getStoredUser();
-        if (isSessionExpired(user)) {
-            clearSession();
-            return false;
-        }
+        if (isSessionExpired(user)) { clearSession(); return false; }
         return true;
     }
 
@@ -117,20 +122,12 @@
         return path.startsWith('/') ? path : `/${path}`;
     }
 
-    function goTo(routeName) {
-        window.location.href = getRoute(routeName);
-    }
-
-    function replaceTo(routeName) {
-        window.location.replace(getRoute(routeName));
-    }
+    function goTo(routeName)    { window.location.href    = getRoute(routeName); }
+    function replaceTo(routeName) { window.location.replace(getRoute(routeName)); }
 
     async function rawFetch(path, options = {}) {
         const url = `${getBaseUrl()}${path}`;
-        const headers = {
-            Accept: 'application/json',
-            ...(options.headers || {}),
-        };
+        const headers = { Accept: 'application/json', ...(options.headers || {}) };
 
         if (options.body !== undefined && options.body !== null && !headers['Content-Type']) {
             headers['Content-Type'] = 'application/json';
@@ -144,8 +141,7 @@
         try {
             return await fetch(url, { ...options, headers });
         } catch {
-            const isFileProtocol = window.location.protocol === 'file:';
-            const hint = isFileProtocol
+            const hint = window.location.protocol === 'file:'
                 ? ' Usa npm run dev (no abras el HTML con doble clic).'
                 : ' Verifica que el backend esté en ejecución y CORS configurado.';
             throw new Error(`No se pudo conectar con el backend.${hint}`);
@@ -153,25 +149,23 @@
     }
 
     async function tryRefreshToken() {
-        const refreshToken = getRefreshToken();
-        if (!refreshToken) return false;
+        const rt = getRefreshToken();
+        if (!rt) return false;
 
         if (!refreshPromise) {
             refreshPromise = (async () => {
-                const response = await rawFetch('/api/Auth/refresh', {
+                const response = await rawFetch('/api/Auth/refresh-token', {
                     method: 'POST',
                     auth: false,
-                    body: JSON.stringify({ refreshToken }),
+                    body: JSON.stringify({ token: getAccessToken() ?? '', refreshToken: rt }),
                 });
                 const body = await parseJsonSafe(response);
                 if (!response.ok) return false;
 
                 const persistent = localStorage.getItem(TOKEN_KEYS.persistent) === '1';
-                saveSession(body, persistent);
+                saveSession(normalizeAuthData(body), persistent);
                 return true;
-            })().finally(() => {
-                refreshPromise = null;
-            });
+            })().finally(() => { refreshPromise = null; });
         }
 
         return refreshPromise;
@@ -184,16 +178,12 @@
         if (response.status === 401 && options.auth !== false && !retried) {
             const refreshed = await tryRefreshToken();
             if (refreshed) return request(path, options, true);
-
             clearSession();
             if (!options.skipAuthRedirect) replaceTo('login');
             throw new Error('Sesión expirada. Inicia sesión nuevamente.');
         }
 
-        if (!response.ok) {
-            throw new Error(extractErrorMessage(response.status, body));
-        }
-
+        if (!response.ok) throw new Error(extractErrorMessage(response.status, body));
         return body;
     }
 
@@ -209,9 +199,7 @@
             throw new Error('Sesión expirada. Inicia sesión nuevamente.');
         }
 
-        if (!response.ok) {
-            throw new Error(extractErrorMessage(response.status, body));
-        }
+        if (!response.ok) throw new Error(extractErrorMessage(response.status, body));
 
         const totalHeader = response.headers.get('X-Total-Count');
         const totalFromHeader = totalHeader ? parseInt(totalHeader, 10) : null;
@@ -219,15 +207,20 @@
         return window.AppUtils.unwrapList(body, totalFromHeader);
     }
 
+    // ── Auth ──────────────────────────────────────────────────────────────────
+
     async function login(correo, password, options = {}) {
-        const tokens = await request('/api/Auth/login', {
+        // Backend espera { email, password }
+        const body = await request('/api/Auth/login', {
             method: 'POST',
             auth: false,
-            body: JSON.stringify({ correo, password }),
+            body: JSON.stringify({ email: correo, password }),
             skipAuthRedirect: true,
         });
-        saveSession(tokens, Boolean(options.remember));
-        return tokens;
+        const normalized = normalizeAuthData(body);
+        saveSession(normalized, Boolean(options.remember));
+        // Devuelve los datos normalizados para que Diseño.js pueda usarlos
+        return normalized;
     }
 
     async function logout() {
@@ -240,99 +233,162 @@
                     skipAuthRedirect: true,
                 });
             }
-        } catch {
-            /* cerrar sesión local aunque falle el servidor */
-        }
+        } catch { /* cerrar sesión local aunque falle el servidor */ }
         clearSession();
     }
 
     async function healthCheck() {
-        const pageSize = window.APP_CONFIG?.pagination?.defaultPageSize ?? 1;
-        await requestList(`/api/Clientes${buildQuery({ pagina: 1, tamano: pageSize })}`, {
+        await requestList(`/api/Clientes${buildQuery({ PageNumber: 1, PageSize: 1 })}`, {
             skipAuthRedirect: true,
         });
         return true;
     }
 
+    // ── Clientes ──────────────────────────────────────────────────────────────
+
     const clientes = {
         list: (params = {}) => requestList(
             `/api/Clientes${buildQuery({
-                pagina: params.pagina ?? 1,
-                tamano: params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
-                ordenarPor: params.ordenarPor,
-                descendente: params.descendente,
+                PageNumber: params.pagina ?? 1,
+                PageSize:   params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
+                busqueda:   params.busqueda,
             })}`
         ),
         getById: (id) => request(`/api/Clientes/${id}`),
-        create: (payload) => request('/api/Clientes', {
-            method: 'POST',
-            body: JSON.stringify(payload),
-        }),
+        create:  (payload) => request('/api/Clientes', { method: 'POST', body: JSON.stringify(payload) }),
     };
+
+    // ── Órdenes de Servicio ───────────────────────────────────────────────────
 
     const ordenes = {
         list: (params = {}) => requestList(
-            `/api/OrdenesServicio${buildQuery({
-                pagina: params.pagina ?? 1,
-                tamano: params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
-                ultimoId: params.ultimoId ?? 0,
+            `/api/Ordenes${buildQuery({
+                PageNumber: params.pagina ?? 1,
+                PageSize:   params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
             })}`
         ),
-        porMecanico: (mecanicoId) => request(`/api/OrdenesServicio/mecanico/${mecanicoId}`),
-        porVehiculo: (vehiculoId) => request(`/api/OrdenesServicio/vehiculo/${vehiculoId}`),
-        create: (payload) => request('/api/OrdenesServicio', {
-            method: 'POST',
-            body: JSON.stringify(payload),
-        }),
-        cambiarEstado: (id, payload) => request(`/api/OrdenesServicio/${id}/estado`, {
+        porMecanico: (mecanicoId) => requestList(`/api/Ordenes${buildQuery({ mecanicoId })}`),
+        porVehiculo: (vehiculoId) => requestList(`/api/Ordenes${buildQuery({ vehiculoId })}`),
+        create: (payload) => request('/api/Ordenes', { method: 'POST', body: JSON.stringify(payload) }),
+        cambiarEstado: (id, payload) => request(`/api/Ordenes/${id}/estado`, {
             method: 'PATCH',
             body: JSON.stringify(payload),
         }),
     };
 
+    // ── Repuestos ─────────────────────────────────────────────────────────────
+
     const repuestos = {
         list: (params = {}) => requestList(
             `/api/Repuestos${buildQuery({
-                pagina: params.pagina ?? 1,
-                tamano: params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
+                PageNumber: params.pagina ?? 1,
+                PageSize:   params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
             })}`
         ),
-        stockCritico: () => request('/api/Repuestos/stock-critico'),
+        // Stock crítico viene del dashboard endpoint
+        stockCritico: () =>
+            requestList(`/api/Dashboard/repuestos-criticos${buildQuery({ pageNumber: 1, pageSize: 50 })}`)
+                .then((r) => r.items ?? []),
         movimiento: (payload) => request('/api/Repuestos/movimiento', {
             method: 'POST',
             body: JSON.stringify(payload),
         }),
     };
 
+    // ── Configuración ─────────────────────────────────────────────────────────
+
     const configuracion = {
-        list: () => request('/api/Configuracion'),
-        update: (clave, valor) => request(`/api/Configuracion/${encodeURIComponent(clave)}`, {
+        list:       () => request('/api/Configuracion'),
+        update:     (clave, valor) => request(`/api/Configuracion/${encodeURIComponent(clave)}`, {
             method: 'PUT',
             body: JSON.stringify({ valor }),
         }),
         rateLimits: () => request('/api/Configuracion/rate-limits'),
     };
 
+    // ── Vehículos ─────────────────────────────────────────────────────────────
+
+    const vehiculos = {
+        list: (params = {}) => requestList(
+            `/api/Vehiculos${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 20 })}`
+        ),
+        getById: (id) => request(`/api/Vehiculos/${id}`),
+        create: (payload) => request('/api/Vehiculos', { method: 'POST', body: JSON.stringify(payload) }),
+    };
+
+    // ── Empleados ─────────────────────────────────────────────────────────────
+
+    const empleados = {
+        list: (params = {}) => requestList(
+            `/api/Empleados${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 50, tipo: params.tipo })}`
+        ),
+    };
+
+    // ── Presupuestos (Mini Órdenes) ───────────────────────────────────────────
+
+    const presupuestos = {
+        list: (params = {}) => requestList(
+            `/api/MiniOrdenes${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 20 })}`
+        ),
+    };
+
+    // ── Proveedores ───────────────────────────────────────────────────────────
+
+    const proveedores = {
+        list: (params = {}) => requestList(
+            `/api/Proveedores${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 20 })}`
+        ),
+        create: (payload) => request('/api/Proveedores', { method: 'POST', body: JSON.stringify(payload) }),
+    };
+
+    // ── Facturas ──────────────────────────────────────────────────────────────
+
+    const facturas = {
+        list: (params = {}) => requestList(
+            `/api/Facturas${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 20 })}`
+        ),
+        getById: (id) => request(`/api/Facturas/${id}`),
+    };
+
+    // ── Dashboard API ─────────────────────────────────────────────────────────
+
+    const dashboardApi = {
+        resumen: () => request('/api/Dashboard/resumen'),
+        ordenesPorEstado: () => request('/api/Dashboard/ordenes-por-estado'),
+        facturacionMensual: () => request('/api/Dashboard/facturacion-mensual'),
+    };
+
+    // ── Catálogos (endpoints públicos) ────────────────────────────────────────
+
+    const catalogos = {
+        marcas: () => request('/api/Catalogos/marcas', { auth: false }),
+        modelos: (marcaId) => request(`/api/Catalogos/modelos${marcaId ? `?marcaId=${marcaId}` : ''}`, { auth: false }),
+        colores: () => request('/api/Catalogos/colores', { auth: false }),
+        tiposDocumento: () => request('/api/Catalogos/tipos-documento', { auth: false }),
+    };
+
+    // ── Auth extendido (registro de cliente) ──────────────────────────────────
+
+    const auth = {
+        registerCliente: (payload) => rawFetch('/api/Auth/register-cliente', {
+            method: 'POST',
+            auth: false,
+            body: JSON.stringify(payload),
+        }).then(async (resp) => {
+            const body = await resp.json();
+            if (!resp.ok) throw new Error(body?.mensaje || body?.errores?.[0] || 'Error al registrar');
+            return body;
+        }),
+    };
+
     window.AutoTallerApi = {
-        login,
-        logout,
-        request,
-        requestList,
-        healthCheck,
-        clearSession,
-        getAccessToken,
-        getRefreshToken,
-        getStoredUser,
-        isAuthenticated,
-        getBaseUrl,
-        getRoute,
-        goTo,
-        replaceTo,
-        buildQuery,
-        clientes,
-        ordenes,
-        repuestos,
-        configuracion,
+        login, logout, request, requestList,
+        healthCheck, clearSession,
+        getAccessToken, getRefreshToken, getStoredUser,
+        isAuthenticated, getBaseUrl, getRoute, goTo, replaceTo, buildQuery,
+        clientes, ordenes, repuestos, configuracion,
+        vehiculos, empleados, presupuestos, proveedores, facturas,
+        dashboardApi, catalogos, auth,
         TOKEN_KEYS,
     };
 })();

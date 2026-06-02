@@ -44,11 +44,11 @@ function renderTable(container, items, utils) {
 
     const rows = items.map((c) => `
         <tr>
-            <td>${utils.escapeHtml(c.clienteId)}</td>
-            <td>${utils.escapeHtml(c.nombreCompleto)}</td>
-            <td>${utils.escapeHtml(c.documentoIdentidad)}</td>
-            <td>${utils.escapeHtml(c.tipoDocumento)}</td>
-            <td>${c.activo ? 'Activo' : 'Inactivo'}</td>
+            <td>${utils.escapeHtml(String(c.numero ?? c.id ?? '—'))}</td>
+            <td>${utils.escapeHtml(`${c.nombres ?? ''} ${c.apellidos ?? ''}`.trim() || '—')}</td>
+            <td>${utils.escapeHtml(c.numeroDocumento ?? '—')}</td>
+            <td>${utils.escapeHtml(c.tipoDocumento ?? '—')}</td>
+            <td>${c.activo !== false ? 'Activo' : 'Inactivo'}</td>
             <td>${utils.formatDate(c.creadoEn)}</td>
         </tr>
     `).join('');

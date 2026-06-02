@@ -38,11 +38,16 @@
 
     function buildNavItems(roles, active, api) {
         const links = [
-            { key: 'dashboard', label: 'Inicio', route: 'dashboard', roles: null },
-            { key: 'clientes', label: 'Clientes', route: 'clientes', roles: ['admin', 'recep', 'mecan'] },
-            { key: 'ordenes', label: 'Órdenes', route: 'ordenes', roles: ['admin', 'recep', 'mecan'] },
-            { key: 'repuestos', label: 'Repuestos', route: 'repuestos', roles: ['admin', 'recep', 'mecan'] },
-            { key: 'configuracion', label: 'Config', route: 'configuracion', roles: ['admin'] },
+            { key: 'dashboard',     label: 'Inicio',        route: 'dashboard',    roles: null },
+            { key: 'clientes',      label: 'Clientes',       route: 'clientes',     roles: ['admin', 'recep', 'jefetaller'] },
+            { key: 'vehiculos',     label: 'Vehículos',      route: 'vehiculos',    roles: ['admin', 'recep', 'jefetaller', 'mecan'] },
+            { key: 'ordenes',       label: 'Órdenes',        route: 'ordenes',      roles: ['admin', 'recep', 'mecan', 'jefetaller'] },
+            { key: 'presupuestos',  label: 'Presupuestos',   route: 'presupuestos', roles: ['admin', 'recep', 'mecan', 'jefetaller', 'cliente'] },
+            { key: 'empleados',     label: 'Mecánicos',      route: 'empleados',    roles: ['admin', 'jefetaller'] },
+            { key: 'repuestos',     label: 'Inventario',     route: 'repuestos',    roles: ['admin', 'mecan', 'almacen', 'bodega', 'jefetaller'] },
+            { key: 'proveedores',   label: 'Proveedores',    route: 'proveedores',  roles: ['admin', 'recep'] },
+            { key: 'facturas',      label: 'Facturas',       route: 'facturas',     roles: ['admin', 'recep', 'jefetaller'] },
+            { key: 'configuracion', label: 'Config',         route: 'configuracion',roles: ['admin'] },
         ];
 
         return links

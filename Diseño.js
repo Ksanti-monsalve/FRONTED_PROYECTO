@@ -195,15 +195,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const credentials = {
         admin: {
             email: 'admin@autotaller.com',
-            pass: 'adminSecurePass1'
+            pass: 'Admin@123'
         },
         mecanico: {
-            email: 'especialista.mateo@autotaller.com',
-            pass: 'techSpeed8800'
+            email: 'mecanico@autotaller.com',
+            pass: 'Mecanico@123'
         },
-        recep: {
-            email: 'concierge.sofia@autotaller.com',
-            pass: 'frontDesk2026'
+        recepcionista: {
+            email: 'recepcion@autotaller.com',
+            pass: 'Recepcion@123'
         }
     };
 
@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (role === 'admin') data = credentials.admin;
             else if (role === 'mecanico') data = credentials.mecanico;
-            else data = credentials.recep;
+            else data = credentials.recepcionista;
 
             // Clear errors prior to typing
             clearValidationStates();

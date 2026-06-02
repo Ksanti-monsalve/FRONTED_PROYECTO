@@ -42,16 +42,21 @@ function renderTable(container, items, utils) {
         return;
     }
 
-    const rows = items.map((r) => `
-        <tr class="${r.bajoStockMinimo ? 'row-warning' : ''}">
-            <td>${utils.escapeHtml(r.codigo)}</td>
-            <td>${utils.escapeHtml(r.descripcion)}</td>
-            <td>${utils.escapeHtml(r.categoria)}</td>
-            <td>${utils.escapeHtml(r.cantidadStock)} / ${utils.escapeHtml(r.stockMinimo)}</td>
-            <td>$${Number(r.precioUnitario).toLocaleString('es-CO')}</td>
-            <td>${r.bajoStockMinimo ? 'Crítico' : 'OK'}</td>
+    const rows = items.map((r) => {
+        const stock = r.stockActual ?? r.cantidadStock ?? 0;
+        const minimo = r.stockMinimo ?? 0;
+        const critico = stock <= minimo;
+        const precio = r.precioVenta ?? r.precioUnitario ?? r.precioCompra ?? 0;
+        return `
+        <tr class="${critico ? 'row-warning' : ''}">
+            <td>${utils.escapeHtml(r.codigo ?? '—')}</td>
+            <td>${utils.escapeHtml(r.nombre ?? r.descripcion ?? '—')}</td>
+            <td>${utils.escapeHtml(r.categoria ?? '—')}</td>
+            <td>${utils.escapeHtml(String(stock))} / ${utils.escapeHtml(String(minimo))}</td>
+            <td>$${Number(precio).toLocaleString('es-CO')}</td>
+            <td>${critico ? 'Crítico' : 'OK'}</td>
         </tr>
-    `).join('');
+    `}).join('');
 
     container.innerHTML = `
         <table class="data-table">
@@ -86,13 +91,16 @@ function renderCritical(container, items, utils, canView) {
 
     container.innerHTML = `
         <ul class="critical-list">
-            ${list.map((r) => `
+            ${list.map((r) => {
+                const stock = r.stockActual ?? r.cantidadStock ?? 0;
+                const min   = r.stockMinimo ?? 0;
+                return `
                 <li>
-                    <strong>${utils.escapeHtml(r.codigo)}</strong>
-                    — ${utils.escapeHtml(r.descripcion)}
-                    <span>(${utils.escapeHtml(r.cantidadStock)} / mín ${utils.escapeHtml(r.stockMinimo)})</span>
+                    <strong>${utils.escapeHtml(r.codigo ?? '—')}</strong>
+                    — ${utils.escapeHtml(r.nombre ?? r.descripcion ?? '—')}
+                    <span>(${utils.escapeHtml(String(stock))} / mín ${utils.escapeHtml(String(min))})</span>
                 </li>
-            `).join('')}
+            `}).join('')}
         </ul>
     `;
 }

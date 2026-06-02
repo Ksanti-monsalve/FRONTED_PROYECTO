@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presupuestos — AutoTallerManager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body class="dashboard-page module-page">
+    <div class="luxury-bg-mesh"></div>
+
+    <header class="app-layout-header">
+        <div class="layout-brand">
+            <span class="brand-tagline">AutoTallerManager</span>
+            <h1>Presupuestos / Mini Órdenes</h1>
+        </div>
+        <nav class="layout-nav" id="layout-nav"></nav>
+        <div class="layout-user">
+            <div>
+                <p class="layout-user-name" id="layout-user-name">—</p>
+                <p class="layout-user-role" id="layout-user-role">—</p>
+            </div>
+            <button type="button" class="btn-dashboard" id="btn-logout">Salir</button>
+        </div>
+    </header>
+
+    <p class="api-status" id="layout-api-status"></p>
+    <div class="page-alert" id="page-message" hidden></div>
+
+    <main class="dashboard-shell">
+        <section class="dashboard-card">
+            <div class="section-toolbar">
+                <h2>Presupuestos Registrados</h2>
+                <button type="button" class="btn-dashboard" id="btn-reload">Actualizar</button>
+            </div>
+            <div id="table-container" class="table-wrap">
+                <p class="table-loading">Cargando presupuestos...</p>
+            </div>
+            <div class="pagination-bar" id="pagination-bar"></div>
+        </section>
+    </main>
+
+    <script src="../config.js"></script>
+    <script src="../utils.js"></script>
+    <script src="../api.js"></script>
+    <script src="../auth-guard.js"></script>
+    <script src="../layout.js"></script>
+    <script src="presupuestos.js"></script>
+</body>
+</html>
