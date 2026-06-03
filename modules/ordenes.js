@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const id    = raw.id ?? raw.Id ?? '';
 
             // Botones de acción según estado y rol
-            let acciones = '';
+            let acciones = `<button class="btn-accion btn-detalle" data-id="${id}">Ver</button>`;
             if (o.estado === 'Pendiente'  && puedeAprobar)   acciones += `<button class="btn-accion btn-aprobar"   data-id="${id}" data-cliente="${raw.clienteId ?? raw.ClienteId ?? ''}">Aprobar</button>`;
             if (o.estado === 'Aprobada'   && puedeAsignar)   acciones += `<button class="btn-accion btn-asignar"   data-id="${id}">Asignar Mec.</button>`;
             if (o.estado === 'En Proceso' && puedeFinalizar) acciones += `<button class="btn-accion btn-finalizar" data-id="${id}">Finalizar</button>`;
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><span class="badge ${eInfo.cls}">${eInfo.label}</span></td>
                 <td>${utils.escapeHtml(o.mecanico === '—' ? 'Sin asignar' : o.mecanico)}</td>
                 <td>${utils.formatDate(o.fechaIngreso)}</td>
-                <td style="white-space:nowrap">${acciones || '<span style="color:var(--text-muted);font-size:11px">—</span>'}</td>
+                <td style="white-space:nowrap">${acciones}</td>
             </tr>`;
         }).join('');
 
@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </table>`;
 
         // Eventos en los botones de acción
+        container.querySelectorAll('.btn-detalle').forEach(btn =>
+            btn.addEventListener('click', () => abrirDetalleOrden(btn.dataset.id)));
         container.querySelectorAll('.btn-aprobar').forEach(btn =>
             btn.addEventListener('click', () => aprobarOrden(btn.dataset.id, btn.dataset.cliente)));
         container.querySelectorAll('.btn-asignar').forEach(btn =>
@@ -424,6 +426,286 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             utils.setPageMessage(messageEl, 'error', err.message);
             modalCancelar.classList.remove('open');
+        }
+    });
+
+    // ══ MODAL DETALLE ORDEN ══════════════════════════════════════════════════
+
+    const modalDetalle    = document.getElementById('modal-detalle-orden');
+    const modalAddRepuesto = document.getElementById('modal-add-repuesto');
+    const modalAddMano    = document.getElementById('modal-add-mano');
+
+    let ordenDetalleId    = null;
+    let ordenDetalleEstado = null;
+    let repuestosCache    = [];
+    let mecanicosCache    = [];
+
+    const puedeEditarDetalle = utils.hasRole(roles, 'admin', 'jefetaller', 'mecan');
+
+    async function abrirDetalleOrden(ordenId) {
+        ordenDetalleId = ordenId;
+        document.getElementById('detalle-numero-orden').textContent = '';
+        document.getElementById('detalle-info-basica').innerHTML = '<span style="color:var(--text-muted);font-size:12px">Cargando...</span>';
+        document.getElementById('detalle-tabla-repuestos').innerHTML = '';
+        document.getElementById('detalle-tabla-manos-obra').innerHTML = '';
+        document.getElementById('detalle-total').textContent = '$0';
+        modalDetalle.classList.add('open');
+
+        try {
+            const raw = await api.ordenes.getById(ordenId);
+            const data = raw?.data ?? raw;
+            renderDetalleOrden(data);
+        } catch (err) {
+            document.getElementById('detalle-info-basica').innerHTML =
+                `<span style="color:#f87171;font-size:12px">Error: ${utils.escapeHtml(err.message)}</span>`;
+        }
+    }
+
+    function renderDetalleOrden(data) {
+        const num     = data?.numeroOrden ?? data?.NumeroOrden ?? '—';
+        const estado  = data?.estado ?? data?.Estado ?? '—';
+        const cliente = data?.clienteNombre ?? data?.ClienteNombre ?? '—';
+        const vehiculo = data?.vehiculoPlaca ?? data?.VehiculoPlaca ?? '—';
+        const mecanico = data?.mecanicoNombre ?? data?.MecanicoNombre ?? 'Sin asignar';
+        const tipo    = data?.tipoServicioNombre ?? data?.TipoServicioNombre ?? '—';
+        const desc    = data?.descripcion ?? data?.Descripcion ?? '—';
+        const total   = data?.total ?? data?.Total ?? 0;
+        const detalles = data?.detalles ?? data?.Detalles ?? [];
+        const manosObra = data?.manosObra ?? data?.ManosObra ?? [];
+
+        ordenDetalleEstado = typeof estado === 'string' ? estado : String(estado);
+
+        document.getElementById('detalle-numero-orden').textContent = `#${num}`;
+
+        document.getElementById('detalle-info-basica').innerHTML = `
+            <div><span style="color:var(--text-muted)">Cliente:</span> ${utils.escapeHtml(cliente)}</div>
+            <div><span style="color:var(--text-muted)">Vehículo:</span> ${utils.escapeHtml(vehiculo)}</div>
+            <div><span style="color:var(--text-muted)">Mecánico:</span> ${utils.escapeHtml(mecanico)}</div>
+            <div><span style="color:var(--text-muted)">Tipo de servicio:</span> ${utils.escapeHtml(tipo)}</div>
+            <div style="grid-column:1/-1"><span style="color:var(--text-muted)">Descripción:</span> ${utils.escapeHtml(desc)}</div>
+        `;
+
+        // Repuestos
+        const tbodyRep = document.getElementById('detalle-tabla-repuestos');
+        if (!detalles.length) {
+            tbodyRep.innerHTML = `<tr><td colspan="5" class="detalle-empty">Sin repuestos registrados</td></tr>`;
+        } else {
+            tbodyRep.innerHTML = detalles.map(d => {
+                const nombre  = d.repuestoNombre ?? d.RepuestoNombre ?? '—';
+                const cant    = d.cantidad ?? d.Cantidad ?? 0;
+                const precio  = d.precioUnitario ?? d.PrecioUnitario ?? 0;
+                const sub     = d.subtotal ?? d.Subtotal ?? (cant * precio);
+                const dId     = d.id ?? d.Id ?? '';
+                const btnDel  = puedeEditarDetalle
+                    ? `<td><button class="btn-remove-item" data-detalle-id="${dId}" title="Eliminar">✕</button></td>`
+                    : '<td></td>';
+                return `<tr>
+                    <td>${utils.escapeHtml(nombre)}</td>
+                    <td style="text-align:center">${cant}</td>
+                    <td style="text-align:right">$${Number(precio).toLocaleString('es-CO')}</td>
+                    <td style="text-align:right">$${Number(sub).toLocaleString('es-CO')}</td>
+                    ${btnDel}
+                </tr>`;
+            }).join('');
+
+            tbodyRep.querySelectorAll('.btn-remove-item[data-detalle-id]').forEach(btn =>
+                btn.addEventListener('click', () => eliminarDetalle(btn.dataset.detalleId)));
+        }
+
+        // Mano de obra
+        const tbodyMano = document.getElementById('detalle-tabla-manos-obra');
+        if (!manosObra.length) {
+            tbodyMano.innerHTML = `<tr><td colspan="5" class="detalle-empty">Sin mano de obra registrada</td></tr>`;
+        } else {
+            tbodyMano.innerHTML = manosObra.map(m => {
+                const desc2   = m.descripcion ?? m.Descripcion ?? '—';
+                const mec     = m.empleadoNombre ?? m.EmpleadoNombre ?? '—';
+                const horas   = m.horasTrabajadas ?? m.HorasTrabajadas ?? 0;
+                const costo   = m.costo ?? m.Costo ?? 0;
+                const mId     = m.id ?? m.Id ?? '';
+                const btnDel  = puedeEditarDetalle
+                    ? `<td><button class="btn-remove-item" data-mano-id="${mId}" title="Eliminar">✕</button></td>`
+                    : '<td></td>';
+                return `<tr>
+                    <td>${utils.escapeHtml(desc2)}</td>
+                    <td>${utils.escapeHtml(mec)}</td>
+                    <td style="text-align:center">${horas}</td>
+                    <td style="text-align:right">$${Number(costo).toLocaleString('es-CO')}</td>
+                    ${btnDel}
+                </tr>`;
+            }).join('');
+
+            tbodyMano.querySelectorAll('.btn-remove-item[data-mano-id]').forEach(btn =>
+                btn.addEventListener('click', () => eliminarManoObra(btn.dataset.manoId)));
+        }
+
+        document.getElementById('detalle-total').textContent =
+            `$${Number(total ?? 0).toLocaleString('es-CO')}`;
+
+        // Mostrar botones agregar solo si puede editar y la orden está activa
+        const estadosEditables = ['Pendiente', 'Aprobada', 'En Proceso', '0', '1', '2'];
+        const puedeAgregar = puedeEditarDetalle && estadosEditables.includes(ordenDetalleEstado);
+        document.getElementById('btn-abrir-add-repuesto').style.display = puedeAgregar ? '' : 'none';
+        document.getElementById('btn-abrir-add-mano').style.display = puedeAgregar ? '' : 'none';
+    }
+
+    document.getElementById('detalle-close')?.addEventListener('click', () => modalDetalle.classList.remove('open'));
+    document.getElementById('detalle-close2')?.addEventListener('click', () => modalDetalle.classList.remove('open'));
+    modalDetalle?.addEventListener('click', e => { if (e.target === modalDetalle) modalDetalle.classList.remove('open'); });
+
+    // ── Eliminar repuesto del detalle ────────────────────────────────────────
+
+    async function eliminarDetalle(detalleId) {
+        if (!confirm('¿Eliminar este repuesto de la orden?')) return;
+        try {
+            await api.ordenes.removeDetalle(ordenDetalleId, detalleId);
+            await recargarDetalle();
+        } catch (err) {
+            utils.setPageMessage(messageEl, 'error', err.message);
+        }
+    }
+
+    async function eliminarManoObra(manoId) {
+        if (!confirm('¿Eliminar esta mano de obra de la orden?')) return;
+        try {
+            await api.ordenes.removeManoObra(ordenDetalleId, manoId);
+            await recargarDetalle();
+        } catch (err) {
+            utils.setPageMessage(messageEl, 'error', err.message);
+        }
+    }
+
+    async function recargarDetalle() {
+        try {
+            const raw = await api.ordenes.getById(ordenDetalleId);
+            renderDetalleOrden(raw?.data ?? raw);
+            cargarOrdenes();
+        } catch { /* silent */ }
+    }
+
+    // ── Modal: Agregar Repuesto ──────────────────────────────────────────────
+
+    document.getElementById('btn-abrir-add-repuesto')?.addEventListener('click', abrirModalAddRepuesto);
+
+    async function abrirModalAddRepuesto() {
+        document.getElementById('add-cantidad').value    = '1';
+        document.getElementById('add-precio-unitario').value = '';
+        modalAddRepuesto.classList.add('open');
+
+        const sel = document.getElementById('sel-repuesto');
+        sel.innerHTML = '<option value="">Cargando...</option>';
+
+        if (!repuestosCache.length) {
+            try {
+                const { items } = await api.repuestos.list({ tamano: 200 });
+                repuestosCache = items ?? [];
+            } catch (err) {
+                sel.innerHTML = `<option value="">Error al cargar: ${utils.escapeHtml(err.message)}</option>`;
+                return;
+            }
+        }
+
+        if (repuestosCache.length) {
+            sel.innerHTML = '<option value="">— Seleccionar —</option>' +
+                repuestosCache.map(r => {
+                    const precio = r.precioVenta ?? r.PrecioVenta ?? 0;
+                    return `<option value="${r.id ?? r.Id}" data-precio="${precio}">
+                        ${utils.escapeHtml(r.codigo ?? r.Codigo ?? '')} — ${utils.escapeHtml(r.nombre ?? r.Nombre ?? '')}
+                        ($${Number(precio).toLocaleString('es-CO')})
+                    </option>`;
+                }).join('');
+        } else {
+            sel.innerHTML = '<option value="">Sin repuestos en inventario</option>';
+        }
+
+        // Autocompletar precio al seleccionar
+        sel.onchange = () => {
+            const opt = sel.options[sel.selectedIndex];
+            const precio = opt?.dataset?.precio;
+            if (precio) document.getElementById('add-precio-unitario').value = precio;
+        };
+    }
+
+    document.getElementById('add-repuesto-close')?.addEventListener('click', () => modalAddRepuesto.classList.remove('open'));
+    document.getElementById('add-repuesto-close2')?.addEventListener('click', () => modalAddRepuesto.classList.remove('open'));
+    modalAddRepuesto?.addEventListener('click', e => { if (e.target === modalAddRepuesto) modalAddRepuesto.classList.remove('open'); });
+
+    document.getElementById('btn-confirmar-add-repuesto')?.addEventListener('click', async () => {
+        const repuestoId = document.getElementById('sel-repuesto').value;
+        const cantidad   = parseInt(document.getElementById('add-cantidad').value);
+        const precio     = parseFloat(document.getElementById('add-precio-unitario').value);
+
+        if (!repuestoId || !cantidad || cantidad < 1 || isNaN(precio) || precio < 0) {
+            alert('Completa todos los campos correctamente.');
+            return;
+        }
+
+        try {
+            await api.ordenes.addDetalle(ordenDetalleId, {
+                RepuestoId: repuestoId,
+                Cantidad: cantidad,
+                PrecioUnitario: precio,
+            });
+            modalAddRepuesto.classList.remove('open');
+            await recargarDetalle();
+        } catch (err) {
+            utils.setPageMessage(messageEl, 'error', err.message);
+            modalAddRepuesto.classList.remove('open');
+        }
+    });
+
+    // ── Modal: Agregar Mano de Obra ──────────────────────────────────────────
+
+    document.getElementById('btn-abrir-add-mano')?.addEventListener('click', abrirModalAddMano);
+
+    async function abrirModalAddMano() {
+        document.getElementById('add-mano-descripcion').value = '';
+        document.getElementById('add-mano-costo').value       = '';
+        document.getElementById('add-mano-horas').value       = '1';
+        modalAddMano.classList.add('open');
+
+        if (!mecanicosCache.length) {
+            try {
+                const { items } = await api.empleados.list({ tamano: 100 });
+                mecanicosCache = (items ?? []).filter(e => [0,1,5,6].includes(e.tipoEmpleado ?? e.TipoEmpleado));
+            } catch { mecanicosCache = []; }
+        }
+
+        const sel = document.getElementById('sel-mecanico-mano');
+        sel.innerHTML = '<option value="">Sin asignar</option>' +
+            mecanicosCache.map(m => {
+                const nombre = `${m.nombres ?? m.Nombres ?? ''} ${m.apellidos ?? m.Apellidos ?? ''}`.trim();
+                return `<option value="${m.id ?? m.Id}">${utils.escapeHtml(nombre)}</option>`;
+            }).join('');
+    }
+
+    document.getElementById('add-mano-close')?.addEventListener('click', () => modalAddMano.classList.remove('open'));
+    document.getElementById('add-mano-close2')?.addEventListener('click', () => modalAddMano.classList.remove('open'));
+    modalAddMano?.addEventListener('click', e => { if (e.target === modalAddMano) modalAddMano.classList.remove('open'); });
+
+    document.getElementById('btn-confirmar-add-mano')?.addEventListener('click', async () => {
+        const descripcion = document.getElementById('add-mano-descripcion').value.trim();
+        const costo       = parseFloat(document.getElementById('add-mano-costo').value);
+        const horas       = parseFloat(document.getElementById('add-mano-horas').value) || 0;
+        const mecanicoId  = document.getElementById('sel-mecanico-mano').value || null;
+
+        if (!descripcion || isNaN(costo) || costo < 0) {
+            alert('Completa la descripción y el costo.');
+            return;
+        }
+
+        try {
+            await api.ordenes.addManoObra(ordenDetalleId, {
+                Descripcion: descripcion,
+                Costo: costo,
+                HorasTrabajadas: horas,
+                EmpleadoId: mecanicoId,
+            });
+            modalAddMano.classList.remove('open');
+            await recargarDetalle();
+        } catch (err) {
+            utils.setPageMessage(messageEl, 'error', err.message);
+            modalAddMano.classList.remove('open');
         }
     });
 

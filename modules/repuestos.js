@@ -12,8 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const reloadBtn = document.getElementById('btn-reload');
 
     const pageSize = window.APP_CONFIG?.pagination?.defaultPageSize ?? 20;
-    // Stock crítico disponible para Almacén, JefeTaller y Admin (no solo mecánicos)
     const canCritical = utils.hasRole(user?.roles, 'admin', 'jefetaller', 'almacen', 'bodega', 'mecan');
+    const canCreate   = utils.hasRole(user?.roles, 'admin', 'recep');
+
+    // Mostrar botón crear solo para Admin y Recepcionista
+    if (canCreate) document.getElementById('btn-nuevo-repuesto').style.display = '';
 
     async function load() {
         utils.setLoading(container, true);
@@ -22,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const listPromise = api.repuestos.list({ pagina: 1, tamano: pageSize });
             const criticalPromise = canCritical
-                ? api.repuestos.stockCritico()
+                ? api.repuestos.stockCritico().catch(() => [])
                 : Promise.resolve([]);
 
             const [{ items }, critical] = await Promise.all([listPromise, criticalPromise]);
@@ -38,6 +41,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
     reloadBtn?.addEventListener('click', load);
     load();
+
+    // ── Modal Nuevo Repuesto ──────────────────────────────────────────────────
+    if (canCreate) {
+        const modal = document.getElementById('modal-nuevo-repuesto');
+        let categoriasCache = [];
+
+        async function abrirModalRepuesto() {
+            ['rep-codigo','rep-nombre','rep-descripcion','rep-unidad'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.value = '';
+            });
+            document.getElementById('rep-precio-compra').value = '';
+            document.getElementById('rep-precio-venta').value  = '';
+            document.getElementById('rep-stock-actual').value  = '0';
+            document.getElementById('rep-stock-minimo').value  = '1';
+            modal.classList.add('open');
+
+            if (!categoriasCache.length) {
+                try {
+                    const resp = await api.catalogos.categoriasRepuesto
+                        ? api.catalogos.categoriasRepuesto()
+                        : api.request('/api/Catalogos/categorias-repuesto');
+                    const items = (resp?.data ?? resp ?? []);
+                    categoriasCache = Array.isArray(items) ? items : [];
+                } catch { categoriasCache = []; }
+            }
+
+            const sel = document.getElementById('rep-categoria');
+            if (categoriasCache.length) {
+                sel.innerHTML = '<option value="">— Seleccionar categoría —</option>' +
+                    categoriasCache.map(c => `<option value="${c.id ?? c.Id}">${utils.escapeHtml(c.nombre ?? c.Nombre ?? '')}</option>`).join('');
+            } else {
+                sel.innerHTML = '<option value="">Sin categorías disponibles</option>';
+            }
+        }
+
+        document.getElementById('btn-nuevo-repuesto')?.addEventListener('click', abrirModalRepuesto);
+        document.getElementById('rep-close')?.addEventListener('click', () => modal.classList.remove('open'));
+        document.getElementById('rep-cancel')?.addEventListener('click', () => modal.classList.remove('open'));
+        modal?.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+        document.getElementById('rep-guardar')?.addEventListener('click', async () => {
+            const codigo      = document.getElementById('rep-codigo').value.trim();
+            const nombre      = document.getElementById('rep-nombre').value.trim();
+            const descripcion = document.getElementById('rep-descripcion').value.trim() || null;
+            const categoriaId = document.getElementById('rep-categoria').value;
+            const precioC     = parseFloat(document.getElementById('rep-precio-compra').value);
+            const precioV     = parseFloat(document.getElementById('rep-precio-venta').value);
+            const stockAct    = parseInt(document.getElementById('rep-stock-actual').value);
+            const stockMin    = parseInt(document.getElementById('rep-stock-minimo').value);
+            const unidad      = document.getElementById('rep-unidad').value.trim() || null;
+
+            if (!codigo || !nombre || !categoriaId || isNaN(precioC) || isNaN(precioV) || isNaN(stockAct) || isNaN(stockMin)) {
+                alert('Completa todos los campos obligatorios (*).');
+                return;
+            }
+
+            try {
+                document.getElementById('rep-guardar').disabled = true;
+                document.getElementById('rep-guardar').textContent = 'Guardando...';
+                await api.repuestos.create({
+                    Codigo: codigo, Nombre: nombre, Descripcion: descripcion,
+                    CategoriaRepuestoId: categoriaId,
+                    PrecioCompra: precioC, PrecioVenta: precioV,
+                    StockActual: stockAct, StockMinimo: stockMin,
+                    Unidad: unidad,
+                });
+                modal.classList.remove('open');
+                utils.setPageMessage(messageEl, 'success', `✓ Repuesto "${nombre}" creado exitosamente.`);
+                load();
+            } catch (err) {
+                utils.setPageMessage(messageEl, 'error', err.message);
+                modal.classList.remove('open');
+            } finally {
+                document.getElementById('rep-guardar').disabled = false;
+                document.getElementById('rep-guardar').textContent = 'Guardar Repuesto';
+            }
+        });
+    }
 });
 
 function renderTable(container, items, utils) {

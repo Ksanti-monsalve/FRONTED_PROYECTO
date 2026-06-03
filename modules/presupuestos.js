@@ -337,46 +337,253 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Detalle
-        const modalDetalle = document.getElementById('modal-detalle');
+        const modalDetalle      = document.getElementById('modal-detalle');
+        const modalAddRep       = document.getElementById('modal-pres-add-rep');
+        const modalAddMano      = document.getElementById('modal-pres-add-mano');
+        let detalleIdActivo     = null;
+        let repuestosCachePres  = [];
+        let mecanicosCachePres  = [];
+
         async function mostrarDetalle(id) {
+            detalleIdActivo = id;
             modalDetalle.classList.add('open');
-            document.getElementById('detalle-body').innerHTML   = '<p style="color:var(--text-muted)">Cargando...</p>';
+            document.getElementById('detalle-body').innerHTML     = '<p style="color:var(--text-muted)">Cargando...</p>';
             document.getElementById('detalle-acciones').innerHTML = '';
             try {
-                const resp  = await api.presupuestos.getById(id);
-                const p     = resp?.data ?? resp;
-                const estado = p.estado ?? p.Estado ?? 0;
-                const eInfo  = ESTADOS[estado] ?? {label:String(estado),cls:''};
-                document.getElementById('detalle-titulo').innerHTML =
-                    `Presupuesto <strong>${utils.escapeHtml(p.numeroMiniOrden??'')}</strong> ` +
-                    `<span class="badge ${eInfo.cls}" style="font-size:11px">${eInfo.label}</span>` +
-                    `<button class="modal-close" id="detalle-close">✕</button>`;
-                document.getElementById('detalle-close')?.addEventListener('click', () => modalDetalle.classList.remove('open'));
-                const lineas = [
-                    ['Técnico',      p.mecanicoNombre   ??'—'],
-                    ['Jefe Taller',  p.jefeTallerNombre ??'—'],
-                    ['Descripción',  p.descripcion      ??'—'],
-                    ['Observaciones',p.observaciones    ??'—'],
-                    ['Motivo rechazo',p.motivoRechazo   ??'—'],
-                    ['Materiales',   `$${Number(p.totalMateriales??0).toLocaleString('es-CO')}`],
-                    ['Mano de obra', `$${Number(p.totalManoObra??0).toLocaleString('es-CO')}`],
-                    ['TOTAL',        `$${Number(p.total??0).toLocaleString('es-CO')}`],
-                    ['OS generada',  p.numeroOrden      ??'No aún'],
-                ].filter(([,v])=>v&&v!=='—');
-                document.getElementById('detalle-body').innerHTML = lineas.map(([l,v],i)=>`
-                    <span style="color:var(--text-muted)">${utils.escapeHtml(l)}</span>
-                    <span style="${i===lineas.length-1&&l==='TOTAL'?'color:var(--champagne-gold);font-weight:600;font-size:15px':'color:var(--text-ivory)'}">${utils.escapeHtml(v)}</span>
-                `).join('');
-                const btns = document.getElementById('detalle-acciones');
-                if (estado===0&&puedeCriar)   btns.innerHTML += `<button class="btn-dashboard btn-enviar" style="border-color:#fbbf24;color:#fbbf24" data-id="${id}" data-accion="enviar">Enviar al Jefe</button>`;
-                if (estado===1&&puedeAprJefe) { btns.innerHTML += `<button class="btn-dashboard btn-aprobar" style="border-color:#4ade80;color:#4ade80" data-id="${id}" data-accion="jefe-aprobar">Aprobar</button>`; btns.innerHTML += `<button class="btn-dashboard btn-rechazar" style="border-color:#f87171;color:#f87171" data-id="${id}" data-accion="jefe-rechazar">Rechazar</button>`; }
-                if (estado===3&&puedeAprCli)  { btns.innerHTML += `<button class="btn-dashboard btn-aprobar" style="border-color:#4ade80;color:#4ade80;font-weight:600" data-id="${id}" data-accion="cli-aprobar">✓ Aprobar por cliente</button>`; btns.innerHTML += `<button class="btn-dashboard btn-rechazar" style="border-color:#f87171;color:#f87171" data-id="${id}" data-accion="cli-rechazar">✗ Rechazar</button>`; }
-                if (estado===5&&(puedeCriar||puedeAprJefe)) btns.innerHTML += `<button class="btn-dashboard btn-completar" style="border-color:#38bdf8;color:#38bdf8" data-id="${id}" data-accion="completar">Completar</button>`;
-                btns.querySelectorAll('[data-accion]').forEach(btn=>btn.addEventListener('click',()=>{ modalDetalle.classList.remove('open'); manejarAccion(btn.dataset.id,btn.dataset.accion); }));
+                const resp   = await api.presupuestos.getById(id);
+                const p      = resp?.data ?? resp;
+                renderDetallePres(p, id);
             } catch (err) {
                 document.getElementById('detalle-body').innerHTML = `<p style="color:#f87171">Error: ${utils.escapeHtml(err.message)}</p>`;
             }
         }
+
+        function renderDetallePres(p, id) {
+            const estado  = p.estado ?? p.Estado ?? 0;
+            const eInfo   = ESTADOS[estado] ?? {label:String(estado), cls:''};
+            const esBorrador = estado === 0;
+            const detalles   = p.detalles   ?? p.Detalles   ?? [];
+            const manosObra  = p.manosObra  ?? p.ManosObra  ?? [];
+
+            document.getElementById('detalle-titulo').innerHTML =
+                `Presupuesto <strong>${utils.escapeHtml(p.numeroMiniOrden??'')}</strong> ` +
+                `<span class="badge ${eInfo.cls}" style="font-size:11px">${eInfo.label}</span>` +
+                `<button class="modal-close" id="detalle-close">✕</button>`;
+            document.getElementById('detalle-close')?.addEventListener('click', () => modalDetalle.classList.remove('open'));
+
+            // Info básica
+            const infoLineas = [
+                ['Técnico',       p.mecanicoNombre   ?? p.MecanicoNombre   ?? '—'],
+                ['Descripción',   p.descripcion      ?? p.Descripcion      ?? '—'],
+                ['Observaciones', p.observaciones    ?? p.Observaciones    ?? null],
+                ['Motivo rechazo',p.motivoRechazo    ?? p.MotivoRechazo    ?? null],
+                ['OS generada',   p.numeroOrden      ?? p.NumeroOrden      ?? null],
+            ].filter(([,v]) => v && v !== '—');
+
+            // Tabla repuestos
+            const filaRep = detalles.length
+                ? detalles.map(d => {
+                    const nombre = d.repuestoNombre ?? d.RepuestoNombre ?? '—';
+                    const cant   = d.cantidad       ?? d.Cantidad       ?? 0;
+                    const precio = d.precioUnitario ?? d.PrecioUnitario ?? 0;
+                    const sub    = d.subtotal       ?? d.Subtotal       ?? (cant * precio);
+                    const dId    = d.id ?? d.Id ?? '';
+                    const btnDel = (esBorrador && puedeCriar)
+                        ? `<button class="btn-rm-pres" data-tipo="rep" data-id="${dId}" title="Quitar" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0 4px">✕</button>`
+                        : '';
+                    return `<tr>
+                        <td>${utils.escapeHtml(d.repuestoCodigo ?? d.RepuestoCodigo ?? '')} ${utils.escapeHtml(nombre)}</td>
+                        <td style="text-align:center">${cant}</td>
+                        <td style="text-align:right">$${Number(precio).toLocaleString('es-CO')}</td>
+                        <td style="text-align:right">$${Number(sub).toLocaleString('es-CO')}</td>
+                        <td>${btnDel}</td>
+                    </tr>`;
+                }).join('')
+                : `<tr><td colspan="5" style="color:var(--text-muted);font-size:12px;font-style:italic;padding:8px 0">Sin repuestos registrados</td></tr>`;
+
+            // Tabla mano de obra
+            const filaMO = manosObra.length
+                ? manosObra.map(m => {
+                    const desc   = m.descripcion   ?? m.Descripcion   ?? '—';
+                    const horas  = m.horasTrabajo  ?? m.HorasTrabajo  ?? 0;
+                    const tarifa = m.tarifaHora    ?? m.TarifaHora    ?? 0;
+                    const total  = m.total         ?? m.Total         ?? (horas * tarifa);
+                    const tec    = m.tecnicoNombre ?? m.TecnicoNombre ?? '—';
+                    const mId    = m.id ?? m.Id ?? '';
+                    const btnDel = (esBorrador && puedeCriar)
+                        ? `<button class="btn-rm-pres" data-tipo="mo" data-id="${mId}" title="Quitar" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0 4px">✕</button>`
+                        : '';
+                    return `<tr>
+                        <td>${utils.escapeHtml(desc)}</td>
+                        <td>${utils.escapeHtml(tec)}</td>
+                        <td style="text-align:center">${horas}h × $${Number(tarifa).toLocaleString('es-CO')}</td>
+                        <td style="text-align:right">$${Number(total).toLocaleString('es-CO')}</td>
+                        <td>${btnDel}</td>
+                    </tr>`;
+                }).join('')
+                : `<tr><td colspan="5" style="color:var(--text-muted);font-size:12px;font-style:italic;padding:8px 0">Sin mano de obra registrada</td></tr>`;
+
+            const addBtns = (esBorrador && puedeCriar) ? `
+                <div style="display:flex;gap:8px;margin-top:8px">
+                    <button class="btn-dashboard" id="pres-btn-add-rep" style="font-size:11px;padding:4px 12px;border-color:var(--gold-border)">+ Repuesto</button>
+                    <button class="btn-dashboard" id="pres-btn-add-mo"  style="font-size:11px;padding:4px 12px;border-color:var(--gold-border)">+ Mano de obra</button>
+                </div>` : '';
+
+            document.getElementById('detalle-body').innerHTML = `
+                ${infoLineas.map(([l,v])=>`
+                    <span style="color:var(--text-muted)">${utils.escapeHtml(l)}</span>
+                    <span style="color:var(--text-ivory)">${utils.escapeHtml(v)}</span>
+                `).join('')}
+                <span style="color:var(--text-muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;grid-column:1/-1;padding-top:10px">Repuestos e Insumos</span>
+                <div style="grid-column:1/-1;overflow-x:auto">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px">
+                        <thead><tr>
+                            <th style="color:var(--text-muted);text-align:left;padding:4px 6px">Descripción</th>
+                            <th style="color:var(--text-muted);text-align:center;padding:4px 6px">Cant.</th>
+                            <th style="color:var(--text-muted);text-align:right;padding:4px 6px">P.Unit.</th>
+                            <th style="color:var(--text-muted);text-align:right;padding:4px 6px">Subtotal</th>
+                            <th></th>
+                        </tr></thead>
+                        <tbody>${filaRep}</tbody>
+                    </table>
+                </div>
+                <span style="color:var(--text-muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;grid-column:1/-1;padding-top:10px">Mano de Obra</span>
+                <div style="grid-column:1/-1;overflow-x:auto">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px">
+                        <thead><tr>
+                            <th style="color:var(--text-muted);text-align:left;padding:4px 6px">Descripción</th>
+                            <th style="color:var(--text-muted);text-align:left;padding:4px 6px">Técnico</th>
+                            <th style="color:var(--text-muted);text-align:center;padding:4px 6px">Horas × Tarifa</th>
+                            <th style="color:var(--text-muted);text-align:right;padding:4px 6px">Total</th>
+                            <th></th>
+                        </tr></thead>
+                        <tbody>${filaMO}</tbody>
+                    </table>
+                </div>
+                ${addBtns}
+                <span style="color:var(--text-muted)">Materiales</span><span style="color:var(--text-ivory)">$${Number(p.totalMateriales??0).toLocaleString('es-CO')}</span>
+                <span style="color:var(--text-muted)">Mano de obra</span><span style="color:var(--text-ivory)">$${Number(p.totalManoObra??0).toLocaleString('es-CO')}</span>
+                <span style="color:var(--text-muted);font-weight:600">TOTAL</span>
+                <span style="color:var(--champagne-gold);font-weight:600;font-size:15px">$${Number(p.total??0).toLocaleString('es-CO')}</span>
+            `;
+
+            // Eventos quitar ítems
+            document.querySelectorAll('#detalle-body .btn-rm-pres').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (!confirm('¿Quitar este ítem del presupuesto?')) return;
+                    try {
+                        if (btn.dataset.tipo === 'rep')
+                            await api.presupuestos.removeDetalle(detalleIdActivo, btn.dataset.id);
+                        else
+                            await api.presupuestos.removeManoObra(detalleIdActivo, btn.dataset.id);
+                        await recargarDetallePres();
+                    } catch (err) { utils.setPageMessage(messageEl, 'error', err.message); }
+                });
+            });
+
+            document.getElementById('pres-btn-add-rep')?.addEventListener('click', () => abrirAddRepPres());
+            document.getElementById('pres-btn-add-mo')?.addEventListener('click',  () => abrirAddMoPres());
+
+            // Botones de flujo
+            const btns = document.getElementById('detalle-acciones');
+            if (estado===0&&puedeCriar)   btns.innerHTML += `<button class="btn-dashboard btn-enviar" style="border-color:#fbbf24;color:#fbbf24" data-id="${id}" data-accion="enviar">Enviar al Jefe</button>`;
+            if (estado===1&&puedeAprJefe) { btns.innerHTML += `<button class="btn-dashboard" style="border-color:#4ade80;color:#4ade80" data-id="${id}" data-accion="jefe-aprobar">Aprobar</button>`; btns.innerHTML += `<button class="btn-dashboard" style="border-color:#f87171;color:#f87171" data-id="${id}" data-accion="jefe-rechazar">Rechazar</button>`; }
+            if (estado===3&&puedeAprCli)  { btns.innerHTML += `<button class="btn-dashboard" style="border-color:#4ade80;color:#4ade80;font-weight:600" data-id="${id}" data-accion="cli-aprobar">✓ Aprobar por cliente</button>`; btns.innerHTML += `<button class="btn-dashboard" style="border-color:#f87171;color:#f87171" data-id="${id}" data-accion="cli-rechazar">✗ Rechazar</button>`; }
+            if (estado===5&&(puedeCriar||puedeAprJefe)) btns.innerHTML += `<button class="btn-dashboard" style="border-color:#38bdf8;color:#38bdf8" data-id="${id}" data-accion="completar">Completar</button>`;
+            btns.querySelectorAll('[data-accion]').forEach(btn=>btn.addEventListener('click',()=>{ modalDetalle.classList.remove('open'); manejarAccion(btn.dataset.id,btn.dataset.accion); }));
+        }
+
+        async function recargarDetallePres() {
+            try {
+                const resp = await api.presupuestos.getById(detalleIdActivo);
+                renderDetallePres(resp?.data ?? resp, detalleIdActivo);
+                cargar();
+            } catch { /* silent */ }
+        }
+
+        // ── Modal agregar repuesto a presupuesto ─────────────────────────────
+        async function abrirAddRepPres() {
+            document.getElementById('pres-rep-cant').value   = '1';
+            document.getElementById('pres-rep-precio').value = '';
+            modalAddRep.classList.add('open');
+
+            if (!repuestosCachePres.length) {
+                const sel = document.getElementById('pres-sel-rep');
+                sel.innerHTML = '<option value="">Cargando...</option>';
+                try {
+                    const { items } = await api.repuestos.list({ tamano: 200 });
+                    repuestosCachePres = items ?? [];
+                } catch (err) {
+                    sel.innerHTML = `<option value="">Error: ${utils.escapeHtml(err.message)}</option>`;
+                    return;
+                }
+            }
+            const sel = document.getElementById('pres-sel-rep');
+            sel.innerHTML = '<option value="">— Seleccionar —</option>' +
+                repuestosCachePres.map(r => {
+                    const precio = r.precioVenta ?? r.PrecioVenta ?? 0;
+                    return `<option value="${r.id??r.Id}" data-precio="${precio}">${utils.escapeHtml(r.codigo??'')} — ${utils.escapeHtml(r.nombre??'')} ($${Number(precio).toLocaleString('es-CO')})</option>`;
+                }).join('');
+            sel.onchange = () => {
+                const opt = sel.options[sel.selectedIndex];
+                if (opt?.dataset?.precio) document.getElementById('pres-rep-precio').value = opt.dataset.precio;
+            };
+        }
+
+        document.getElementById('pres-add-rep-close')?.addEventListener('click',  () => modalAddRep.classList.remove('open'));
+        document.getElementById('pres-add-rep-cancel')?.addEventListener('click', () => modalAddRep.classList.remove('open'));
+        modalAddRep?.addEventListener('click', e => { if (e.target===modalAddRep) modalAddRep.classList.remove('open'); });
+
+        document.getElementById('pres-add-rep-ok')?.addEventListener('click', async () => {
+            const repId  = document.getElementById('pres-sel-rep').value;
+            const cant   = parseInt(document.getElementById('pres-rep-cant').value);
+            const precio = parseFloat(document.getElementById('pres-rep-precio').value);
+            if (!repId || !cant || cant < 1 || isNaN(precio) || precio < 0) { alert('Completa todos los campos.'); return; }
+            try {
+                await api.presupuestos.addDetalle(detalleIdActivo, { RepuestoId: repId, Cantidad: cant, PrecioUnitario: precio });
+                modalAddRep.classList.remove('open');
+                await recargarDetallePres();
+            } catch (err) { utils.setPageMessage(messageEl, 'error', err.message); modalAddRep.classList.remove('open'); }
+        });
+
+        // ── Modal agregar mano de obra a presupuesto ─────────────────────────
+        async function abrirAddMoPres() {
+            document.getElementById('pres-mo-desc').value   = '';
+            document.getElementById('pres-mo-tarifa').value = '';
+            document.getElementById('pres-mo-horas').value  = '1';
+            modalAddMano.classList.add('open');
+
+            if (!mecanicosCachePres.length) {
+                try {
+                    const { items } = await api.empleados.list({ tamano: 100 });
+                    mecanicosCachePres = (items ?? []).filter(e => [0,1,5,6].includes(e.tipoEmpleado ?? e.TipoEmpleado));
+                } catch { mecanicosCachePres = []; }
+            }
+            const sel = document.getElementById('pres-sel-tec');
+            sel.innerHTML = '<option value="">Sin asignar</option>' +
+                mecanicosCachePres.map(m => {
+                    const nombre = `${m.nombres??''} ${m.apellidos??''}`.trim();
+                    return `<option value="${m.id??m.Id}">${utils.escapeHtml(nombre)}</option>`;
+                }).join('');
+        }
+
+        document.getElementById('pres-add-mo-close')?.addEventListener('click',  () => modalAddMano.classList.remove('open'));
+        document.getElementById('pres-add-mo-cancel')?.addEventListener('click', () => modalAddMano.classList.remove('open'));
+        modalAddMano?.addEventListener('click', e => { if (e.target===modalAddMano) modalAddMano.classList.remove('open'); });
+
+        document.getElementById('pres-add-mo-ok')?.addEventListener('click', async () => {
+            const desc   = document.getElementById('pres-mo-desc').value.trim();
+            const tarifa = parseFloat(document.getElementById('pres-mo-tarifa').value);
+            const horas  = parseFloat(document.getElementById('pres-mo-horas').value) || 1;
+            const tecId  = document.getElementById('pres-sel-tec').value || null;
+            if (!desc || isNaN(tarifa) || tarifa < 0) { alert('Completa la descripción y la tarifa.'); return; }
+            try {
+                await api.presupuestos.addManoObra(detalleIdActivo, { Descripcion: desc, TarifaHora: tarifa, HorasTrabajo: horas, TecnicoId: tecId });
+                modalAddMano.classList.remove('open');
+                await recargarDetallePres();
+            } catch (err) { utils.setPageMessage(messageEl, 'error', err.message); modalAddMano.classList.remove('open'); }
+        });
+
         modalDetalle?.addEventListener('click', e => { if (e.target===modalDetalle) modalDetalle.classList.remove('open'); });
     }
 

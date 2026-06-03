@@ -286,6 +286,22 @@
         cancelar: (id, motivo) => request(`/api/Ordenes/${id}/cancelar`, {
             method: 'POST', body: JSON.stringify(motivo),
         }),
+        // POST /api/Ordenes/{id}/detalles — agrega repuesto/insumo
+        addDetalle: (id, payload) => request(`/api/Ordenes/${id}/detalles`, {
+            method: 'POST', body: JSON.stringify(payload),
+        }),
+        // DELETE /api/Ordenes/{id}/detalles/{detalleId}
+        removeDetalle: (id, detalleId) => request(`/api/Ordenes/${id}/detalles/${detalleId}`, {
+            method: 'DELETE',
+        }),
+        // POST /api/Ordenes/{id}/manos-obra — agrega mano de obra
+        addManoObra: (id, payload) => request(`/api/Ordenes/${id}/manos-obra`, {
+            method: 'POST', body: JSON.stringify(payload),
+        }),
+        // DELETE /api/Ordenes/{id}/manos-obra/{manoObraId}
+        removeManoObra: (id, manoObraId) => request(`/api/Ordenes/${id}/manos-obra/${manoObraId}`, {
+            method: 'DELETE',
+        }),
     };
 
     // ── Repuestos ─────────────────────────────────────────────────────────────
@@ -295,16 +311,34 @@
             `/api/Repuestos${buildQuery({
                 PageNumber: params.pagina ?? 1,
                 PageSize:   params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
+                Busqueda:   params.busqueda,
             })}`
         ),
+        getById: (id) => request(`/api/Repuestos/${id}`),
+        // Solo Admin y Recepcionista
+        create: (payload) => request('/api/Repuestos', { method: 'POST', body: JSON.stringify(payload) }),
+        update: (id, payload) => request(`/api/Repuestos/${id}`, { method: 'PUT', body: JSON.stringify(payload) }),
         // Stock crítico viene del dashboard endpoint
         stockCritico: () =>
             requestList(`/api/Dashboard/repuestos-criticos${buildQuery({ pageNumber: 1, pageSize: 50 })}`)
                 .then((r) => r.items ?? []),
-        movimiento: (payload) => request('/api/Repuestos/movimiento', {
-            method: 'POST',
-            body: JSON.stringify(payload),
+        // Movimientos de inventario — rutas correctas del backend
+        entrada: (payload) => request('/api/Inventario/entrada', {
+            method: 'POST', body: JSON.stringify(payload),
         }),
+        salida: (payload) => request('/api/Inventario/salida', {
+            method: 'POST', body: JSON.stringify(payload),
+        }),
+        ajuste: (payload) => request('/api/Inventario/ajuste', {
+            method: 'POST', body: JSON.stringify(payload),
+        }),
+        movimientos: (params = {}) => requestList(
+            `/api/Inventario/movimientos${buildQuery({
+                PageNumber: params.pagina ?? 1,
+                PageSize:   params.tamano ?? 20,
+                repuestoId: params.repuestoId,
+            })}`
+        ),
     };
 
     // ── Configuración ─────────────────────────────────────────────────────────
@@ -377,6 +411,20 @@
             `/api/MiniOrdenes/${id}/completar${observacion ? `?observacion=${encodeURIComponent(observacion)}` : ''}`,
             { method: 'POST', body: '{}' }
         ),
+        // Gestión de repuestos en el presupuesto
+        addDetalle: (id, payload) => request(`/api/MiniOrdenes/${id}/detalles`, {
+            method: 'POST', body: JSON.stringify(payload),
+        }),
+        removeDetalle: (id, detalleId) => request(`/api/MiniOrdenes/${id}/detalles/${detalleId}`, {
+            method: 'DELETE',
+        }),
+        // Gestión de mano de obra en el presupuesto
+        addManoObra: (id, payload) => request(`/api/MiniOrdenes/${id}/manos-obra`, {
+            method: 'POST', body: JSON.stringify(payload),
+        }),
+        removeManoObra: (id, manoObraId) => request(`/api/MiniOrdenes/${id}/manos-obra/${manoObraId}`, {
+            method: 'DELETE',
+        }),
     };
 
     // ── Proveedores ───────────────────────────────────────────────────────────
@@ -413,6 +461,7 @@
         colores: () => request('/api/Catalogos/colores', { auth: false }),
         tiposDocumento: () => request('/api/Catalogos/tipos-documento', { auth: false }),
         tiposServicio: () => request('/api/Catalogos/tipos-servicio'),
+        categoriasRepuesto: () => request('/api/Catalogos/categorias-repuesto'),
     };
 
     // ── Auth extendido (registro de cliente) ──────────────────────────────────

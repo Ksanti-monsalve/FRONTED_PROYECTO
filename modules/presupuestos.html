@@ -330,6 +330,65 @@
         </div>
     </div>
 
+    <!-- ═══ MODAL: AGREGAR REPUESTO AL PRESUPUESTO ═══ -->
+    <div class="modal-overlay" id="modal-pres-add-rep">
+        <div class="modal-box" style="max-width:460px;">
+            <h3>Agregar Repuesto <button class="modal-close" id="pres-add-rep-close">✕</button></h3>
+            <div class="form-field" style="margin-bottom:10px;">
+                <label>Repuesto *</label>
+                <select id="pres-sel-rep" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                    <option value="">Cargando...</option>
+                </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-field">
+                    <label for="pres-rep-cant">Cantidad *</label>
+                    <input type="number" id="pres-rep-cant" min="1" value="1" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                </div>
+                <div class="form-field">
+                    <label for="pres-rep-precio">Precio Unitario *</label>
+                    <input type="number" id="pres-rep-precio" min="0" step="0.01" placeholder="0.00" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-dashboard" id="pres-add-rep-cancel">Cancelar</button>
+                <button type="button" class="btn-dashboard btn-dashboard-primary" id="pres-add-rep-ok">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: AGREGAR MANO DE OBRA AL PRESUPUESTO ═══ -->
+    <div class="modal-overlay" id="modal-pres-add-mano">
+        <div class="modal-box" style="max-width:460px;">
+            <h3>Agregar Mano de Obra <button class="modal-close" id="pres-add-mo-close">✕</button></h3>
+            <div class="form-field" style="margin-bottom:10px;">
+                <label for="pres-mo-desc">Descripción del trabajo *</label>
+                <textarea id="pres-mo-desc" rows="2" placeholder="Ej: Diagnóstico de sistema eléctrico, cambio de pastillas..."
+                    style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="form-field">
+                    <label for="pres-mo-tarifa">Tarifa por hora *</label>
+                    <input type="number" id="pres-mo-tarifa" min="0" step="0.01" placeholder="0.00" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                </div>
+                <div class="form-field">
+                    <label for="pres-mo-horas">Horas estimadas</label>
+                    <input type="number" id="pres-mo-horas" min="0" step="0.5" value="1" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                </div>
+            </div>
+            <div class="form-field" style="margin-top:10px;">
+                <label>Técnico (opcional)</label>
+                <select id="pres-sel-tec" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                    <option value="">Sin asignar</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-dashboard" id="pres-add-mo-cancel">Cancelar</button>
+                <button type="button" class="btn-dashboard btn-dashboard-primary" id="pres-add-mo-ok">Agregar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../config.js"></script>
     <script src="../utils.js"></script>
     <script src="../api.js"></script>

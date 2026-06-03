@@ -31,6 +31,10 @@
         .btn-cancelar  { border-color:#f87171; color:#f87171; }
         .btn-cancelar:hover  { background:rgba(239,68,68,.15); }
 
+        /* ── Botón ver detalle ─────────────────────────────────────── */
+        .btn-detalle { border-color:#c5a059; color:#c5a059; }
+        .btn-detalle:hover { background:rgba(197,160,89,.15); }
+
         /* ── Filtros ──────────────────────────────────────────────────── */
         .filtros-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
         .filtros-bar select, .filtros-bar input {
@@ -41,6 +45,34 @@
         .filtros-bar select:focus, .filtros-bar input:focus {
             outline:none; border-color: var(--bronze-gold);
         }
+
+        /* ── Detalle de orden ─────────────────────────────────────── */
+        .detalle-section { margin-bottom:20px; }
+        .detalle-section h4 {
+            font-size:12px; letter-spacing:.1em; text-transform:uppercase;
+            color:var(--bronze-gold); margin-bottom:10px; padding-bottom:6px;
+            border-bottom:1px solid var(--gold-border);
+        }
+        .detalle-table { width:100%; border-collapse:collapse; font-size:12px; }
+        .detalle-table th { color:var(--text-muted); padding:5px 8px; text-align:left; font-weight:500; }
+        .detalle-table td { padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.04); }
+        .detalle-table td:last-child { text-align:right; }
+        .detalle-empty { color:var(--text-muted); font-size:12px; padding:8px 0; font-style:italic; }
+        .detalle-total {
+            text-align:right; padding:10px 0 0; font-size:13px;
+            font-weight:600; color:var(--champagne-gold);
+        }
+        .btn-remove-item {
+            background:none; border:none; color:var(--text-muted); cursor:pointer;
+            font-size:14px; padding:0 4px; line-height:1;
+        }
+        .btn-remove-item:hover { color:#f87171; }
+        .btn-add-item {
+            font-size:11px; padding:4px 12px; border-radius:3px;
+            border:1px solid var(--gold-border); color:var(--text-ivory);
+            background:transparent; cursor:pointer; margin-top:8px;
+        }
+        .btn-add-item:hover { border-color:var(--bronze-gold); color:var(--bronze-gold); }
 
         /* ── Modal overlay ────────────────────────────────────────────── */
         .modal-overlay {
@@ -253,6 +285,128 @@
             <div class="modal-actions">
                 <button type="button" class="btn-dashboard" id="cancelar-close2">Volver</button>
                 <button type="button" class="btn-dashboard btn-cancelar" id="btn-confirmar-cancelar">Confirmar Cancelación</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL DETALLE ORDEN ═══════════════════ -->
+    <div class="modal-overlay" id="modal-detalle-orden">
+        <div class="modal-box" style="max-width:720px;">
+            <h3>
+                Detalle de Orden <span id="detalle-numero-orden" style="color:var(--bronze-gold)"></span>
+                <button class="modal-close" id="detalle-close">✕</button>
+            </h3>
+
+            <div id="detalle-info-basica" style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--gold-border);">
+            </div>
+
+            <!-- Repuestos / Insumos -->
+            <div class="detalle-section">
+                <h4>Repuestos e Insumos</h4>
+                <table class="detalle-table">
+                    <thead>
+                        <tr>
+                            <th>Repuesto</th>
+                            <th style="text-align:center">Cant.</th>
+                            <th style="text-align:right">P. Unitario</th>
+                            <th style="text-align:right">Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalle-tabla-repuestos"></tbody>
+                </table>
+                <button type="button" class="btn-add-item" id="btn-abrir-add-repuesto" style="display:none">+ Agregar Repuesto</button>
+            </div>
+
+            <!-- Mano de Obra -->
+            <div class="detalle-section">
+                <h4>Mano de Obra</h4>
+                <table class="detalle-table">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Mecánico</th>
+                            <th style="text-align:center">Horas</th>
+                            <th style="text-align:right">Costo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalle-tabla-manos-obra"></tbody>
+                </table>
+                <button type="button" class="btn-add-item" id="btn-abrir-add-mano" style="display:none">+ Agregar Mano de Obra</button>
+            </div>
+
+            <!-- Total -->
+            <div class="detalle-total">
+                Total: <span id="detalle-total">$0</span>
+            </div>
+
+            <div class="modal-actions" style="margin-top:16px;">
+                <button type="button" class="btn-dashboard" id="detalle-close2">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL AGREGAR REPUESTO ═══════════════════ -->
+    <div class="modal-overlay" id="modal-add-repuesto">
+        <div class="modal-box" style="max-width:480px;">
+            <h3>Agregar Repuesto / Insumo <button class="modal-close" id="add-repuesto-close">✕</button></h3>
+            <div class="form-grid" style="grid-template-columns:1fr;">
+                <div class="form-field">
+                    <label>Repuesto *</label>
+                    <select id="sel-repuesto" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                        <option value="">Cargando repuestos...</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="add-cantidad">Cantidad *</label>
+                    <input type="number" id="add-cantidad" min="1" value="1"
+                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                </div>
+                <div class="form-field">
+                    <label for="add-precio-unitario">Precio Unitario *</label>
+                    <input type="number" id="add-precio-unitario" min="0" step="0.01" placeholder="0.00"
+                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-dashboard" id="add-repuesto-close2">Cancelar</button>
+                <button type="button" class="btn-dashboard btn-dashboard-primary" id="btn-confirmar-add-repuesto">Agregar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL AGREGAR MANO DE OBRA ═══════════════════ -->
+    <div class="modal-overlay" id="modal-add-mano">
+        <div class="modal-box" style="max-width:480px;">
+            <h3>Agregar Mano de Obra <button class="modal-close" id="add-mano-close">✕</button></h3>
+            <div class="form-grid" style="grid-template-columns:1fr;">
+                <div class="form-field">
+                    <label for="add-mano-descripcion">Descripción del trabajo *</label>
+                    <textarea id="add-mano-descripcion" rows="2"
+                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;resize:vertical;"
+                        placeholder="Ej: Cambio de aceite y filtro, diagnóstico de frenos..."></textarea>
+                </div>
+                <div class="form-field">
+                    <label for="add-mano-costo">Costo mano de obra *</label>
+                    <input type="number" id="add-mano-costo" min="0" step="0.01" placeholder="0.00"
+                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                </div>
+                <div class="form-field">
+                    <label for="add-mano-horas">Horas trabajadas</label>
+                    <input type="number" id="add-mano-horas" min="0" step="0.5" value="1"
+                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                </div>
+                <div class="form-field">
+                    <label>Mecánico (opcional)</label>
+                    <select id="sel-mecanico-mano" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                        <option value="">Sin asignar</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-dashboard" id="add-mano-close2">Cancelar</button>
+                <button type="button" class="btn-dashboard btn-dashboard-primary" id="btn-confirmar-add-mano">Agregar</button>
             </div>
         </div>
     </div>
