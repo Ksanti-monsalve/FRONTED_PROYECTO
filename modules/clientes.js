@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // RecepcionOnly: Admin, Recepcionista, JefeTaller
+    if (!window.AppAuth?.requireRole('admin', 'recep', 'jefetaller')) return;
+
     const ctx = window.AppLayout?.initAppLayout({ activeModule: 'clientes' });
     if (!ctx) return;
 

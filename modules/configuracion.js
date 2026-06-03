@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // AdminOnly: redirige al dashboard si no es admin
+    if (!window.AppAuth?.requireRole('admin')) return;
+
     const ctx = window.AppLayout?.initAppLayout({ activeModule: 'configuracion' });
     if (!ctx) return;
 
@@ -6,12 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('table-container');
     const messageEl = document.getElementById('page-message');
     const reloadBtn = document.getElementById('btn-reload');
-
-    if (!utils.hasRole(user?.roles, 'admin')) {
-        utils.setPageMessage(messageEl, 'error', 'Solo administradores pueden acceder a este módulo.');
-        if (container) container.innerHTML = '';
-        return;
-    }
 
     async function load() {
         utils.setLoading(container, true);

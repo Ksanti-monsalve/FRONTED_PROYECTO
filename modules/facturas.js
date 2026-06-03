@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // RecepcionOnly + Reportes: Admin, Recepcionista, JefeTaller, JefeAlmacen, JefeBodega
+    if (!window.AppAuth?.requireRole('admin', 'recep', 'jefetaller', 'almacen', 'bodega')) return;
+
     const ctx = window.AppLayout?.initAppLayout({ activeModule: 'facturas' });
     if (!ctx) return;
     const { api, utils } = ctx;

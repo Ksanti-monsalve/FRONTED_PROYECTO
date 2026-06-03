@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // StaffOnly (sin Cliente): Admin, Recepcionista, JefeTaller, Mecánico (y subtipos)
+    if (!window.AppAuth?.requireRole('admin', 'recep', 'jefetaller', 'mecan')) return;
+
     const ctx = window.AppLayout?.initAppLayout({ activeModule: 'vehiculos' });
     if (!ctx) return;
 

@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // AlmacenOTaller: Admin, JefeTaller, JefeAlmacen, JefeBodega, Mecánico (y subtipos)
+    if (!window.AppAuth?.requireRole('admin', 'jefetaller', 'almacen', 'bodega', 'mecan')) return;
+
     const ctx = window.AppLayout?.initAppLayout({ activeModule: 'repuestos' });
     if (!ctx) return;
 
@@ -9,7 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const reloadBtn = document.getElementById('btn-reload');
 
     const pageSize = window.APP_CONFIG?.pagination?.defaultPageSize ?? 20;
-    const canCritical = utils.hasRole(user?.roles, 'admin', 'mecan');
+    // Stock crítico disponible para Almacén, JefeTaller y Admin (no solo mecánicos)
+    const canCritical = utils.hasRole(user?.roles, 'admin', 'jefetaller', 'almacen', 'bodega', 'mecan');
 
     async function load() {
         utils.setLoading(container, true);

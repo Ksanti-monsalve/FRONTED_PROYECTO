@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Proveedores: Admin y Recepcionista
+    if (!window.AppAuth?.requireRole('admin', 'recep')) return;
+
     const ctx = window.AppLayout?.initAppLayout({ activeModule: 'proveedores' });
     if (!ctx) return;
     const { api, utils } = ctx;

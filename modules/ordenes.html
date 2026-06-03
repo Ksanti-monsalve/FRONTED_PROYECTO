@@ -8,6 +8,88 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style.css">
+    <style>
+        /* ── Estado badges coloreados ─────────────────────────────────── */
+        .badge-pendiente  { background: rgba(234,179,8,.18);   color:#fbbf24; }
+        .badge-aprobada   { background: rgba(59,130,246,.18);  color:#60a5fa; }
+        .badge-en-proceso { background: rgba(14,165,233,.18);  color:#38bdf8; }
+        .badge-finalizada { background: rgba(34,197,94,.18);   color:#4ade80; }
+        .badge-cancelada  { background: rgba(239,68,68,.18);   color:#f87171; }
+
+        /* ── Botones de acción en tabla ───────────────────────────────── */
+        .btn-accion {
+            font-size: 11px; padding: 3px 10px; border-radius: 3px;
+            border: 1px solid; cursor: pointer; background: transparent;
+            margin: 0 2px; transition: all .2s;
+        }
+        .btn-aprobar   { border-color:#60a5fa; color:#60a5fa; }
+        .btn-aprobar:hover   { background:rgba(59,130,246,.15); }
+        .btn-asignar   { border-color:#a78bfa; color:#a78bfa; }
+        .btn-asignar:hover   { background:rgba(139,92,246,.15); }
+        .btn-finalizar { border-color:#4ade80; color:#4ade80; }
+        .btn-finalizar:hover { background:rgba(34,197,94,.15); }
+        .btn-cancelar  { border-color:#f87171; color:#f87171; }
+        .btn-cancelar:hover  { background:rgba(239,68,68,.15); }
+
+        /* ── Filtros ──────────────────────────────────────────────────── */
+        .filtros-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+        .filtros-bar select, .filtros-bar input {
+            background: rgba(255,255,255,.04); border: 1px solid var(--gold-border);
+            color: var(--text-ivory); padding: 6px 12px; border-radius:4px;
+            font-size:12px; font-family:inherit;
+        }
+        .filtros-bar select:focus, .filtros-bar input:focus {
+            outline:none; border-color: var(--bronze-gold);
+        }
+
+        /* ── Modal overlay ────────────────────────────────────────────── */
+        .modal-overlay {
+            display:none; position:fixed; inset:0; z-index:200;
+            background:rgba(0,0,0,.75); backdrop-filter:blur(4px);
+            align-items:center; justify-content:center; padding:20px;
+        }
+        .modal-overlay.open { display:flex; }
+        .modal-box {
+            background: #0d0e11; border:1px solid var(--gold-border);
+            border-radius:6px; padding:32px; width:100%; max-width:640px;
+            max-height:90vh; overflow-y:auto;
+        }
+        .modal-box h3 {
+            font-family:var(--font-serif); font-size:1.1rem; font-weight:400;
+            color:var(--champagne-gold); margin-bottom:20px;
+            padding-bottom:10px; border-bottom:1px solid var(--gold-border);
+        }
+        .modal-close {
+            float:right; background:none; border:none; color:var(--text-muted);
+            font-size:18px; cursor:pointer; line-height:1; margin-top:-4px;
+        }
+        .modal-close:hover { color:var(--text-ivory); }
+        .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+
+        /* Paso activo en el formulario */
+        .form-step { display:none; }
+        .form-step.active { display:block; }
+        .step-indicator {
+            font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+            color:var(--text-muted); margin-bottom:16px;
+        }
+        .step-indicator .current { color:var(--bronze-gold); font-weight:600; }
+
+        /* Lista de selección de cliente/vehículo */
+        .sel-list {
+            max-height:220px; overflow-y:auto; border:1px solid var(--gold-border);
+            border-radius:4px; margin-top:8px;
+        }
+        .sel-item {
+            padding:10px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.03);
+            font-size:13px; transition:background .15s;
+        }
+        .sel-item:last-child { border-bottom:none; }
+        .sel-item:hover { background:rgba(197,160,89,.08); }
+        .sel-item.selected { background:rgba(197,160,89,.15); color:var(--champagne-gold); }
+        .sel-item small { display:block; color:var(--text-muted); font-size:11px; margin-top:2px; }
+        .sel-empty { padding:14px; color:var(--text-muted); font-size:13px; text-align:center; }
+    </style>
 </head>
 <body class="dashboard-page module-page">
     <div class="luxury-bg-mesh"></div>
@@ -15,7 +97,7 @@
     <header class="app-layout-header">
         <div class="layout-brand">
             <span class="brand-tagline">AutoTallerManager</span>
-            <h1>Órdenes de servicio</h1>
+            <h1>Órdenes de Servicio</h1>
         </div>
         <nav class="layout-nav" id="layout-nav"></nav>
         <div class="layout-user">
@@ -33,15 +115,147 @@
     <main class="dashboard-shell">
         <section class="dashboard-card">
             <div class="section-toolbar">
-                <h2>Órdenes activas (API)</h2>
-                <button type="button" class="btn-dashboard" id="btn-reload">Actualizar</button>
+                <h2>Órdenes de Servicio</h2>
+                <div style="display:flex;gap:8px;">
+                    <button type="button" class="btn-dashboard" id="btn-reload">Actualizar</button>
+                    <!-- Solo visible para roles que pueden crear órdenes -->
+                    <button type="button" class="btn-dashboard btn-dashboard-primary" id="btn-nueva-orden" style="display:none">
+                        + Nueva Orden
+                    </button>
+                </div>
             </div>
+
+            <!-- Filtros -->
+            <div class="filtros-bar">
+                <select id="filtro-estado">
+                    <option value="">Todos los estados</option>
+                    <option value="0">Pendiente</option>
+                    <option value="1">Aprobada</option>
+                    <option value="2">En Proceso</option>
+                    <option value="3">Finalizada</option>
+                    <option value="4">Cancelada</option>
+                </select>
+                <button type="button" class="btn-dashboard" id="btn-aplicar-filtro" style="padding:6px 14px;font-size:12px;">Filtrar</button>
+            </div>
+
             <div id="table-container" class="table-wrap">
                 <p class="table-loading">Cargando órdenes...</p>
             </div>
             <div class="pagination-bar" id="pagination-bar"></div>
         </section>
     </main>
+
+    <!-- ═══════════════════ MODAL NUEVA ORDEN ═══════════════════ -->
+    <div class="modal-overlay" id="modal-nueva-orden">
+        <div class="modal-box">
+            <h3>
+                Nueva Orden de Servicio
+                <button class="modal-close" id="modal-close-btn">✕</button>
+            </h3>
+
+            <div class="step-indicator">
+                Paso <span class="current" id="step-num">1</span> de 3
+            </div>
+
+            <!-- Paso 1: Seleccionar cliente -->
+            <div class="form-step active" id="step-1">
+                <div class="form-field">
+                    <label>Buscar cliente</label>
+                    <input type="text" id="buscar-cliente" placeholder="Nombre, documento o email..." autocomplete="off">
+                </div>
+                <div class="sel-list" id="lista-clientes">
+                    <p class="sel-empty">Escribe para buscar clientes</p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-dashboard" id="modal-close-btn2">Cancelar</button>
+                    <button type="button" class="btn-dashboard btn-dashboard-primary" id="step1-next" disabled>Siguiente →</button>
+                </div>
+            </div>
+
+            <!-- Paso 2: Seleccionar vehículo -->
+            <div class="form-step" id="step-2">
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+                    Cliente: <strong id="cliente-seleccionado-label" style="color:var(--text-ivory)">—</strong>
+                </p>
+                <div class="form-field">
+                    <label>Buscar vehículo (placa)</label>
+                    <input type="text" id="buscar-vehiculo" placeholder="Placa del vehículo..." autocomplete="off">
+                </div>
+                <div class="sel-list" id="lista-vehiculos">
+                    <p class="sel-empty">Escribe la placa para buscar</p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-dashboard" id="step2-back">← Atrás</button>
+                    <button type="button" class="btn-dashboard btn-dashboard-primary" id="step2-next" disabled>Siguiente →</button>
+                </div>
+            </div>
+
+            <!-- Paso 3: Detalle de la orden -->
+            <div class="form-step" id="step-3">
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
+                    Cliente: <strong id="resumen-cliente" style="color:var(--text-ivory)">—</strong> &nbsp;|&nbsp;
+                    Vehículo: <strong id="resumen-vehiculo" style="color:var(--text-ivory)">—</strong>
+                </p>
+                <div class="form-grid" style="grid-template-columns:1fr;">
+                    <div class="form-field">
+                        <label for="tipo-servicio">Tipo de servicio</label>
+                        <select id="tipo-servicio">
+                            <option value="">Sin especificar</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="descripcion-orden">Descripción del trabajo *</label>
+                        <textarea id="descripcion-orden" rows="4"
+                            placeholder="Describe qué falla reporta el cliente y qué trabajo se realizará..."
+                            style="resize:vertical;min-height:100px;width:100%;background:rgba(255,255,255,.04);
+                                   border:1px solid var(--gold-border);border-radius:4px;
+                                   color:var(--text-ivory);padding:10px 12px;font-family:inherit;font-size:13px;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-dashboard" id="step3-back">← Atrás</button>
+                    <button type="button" class="btn-dashboard btn-dashboard-primary" id="btn-crear-orden">
+                        <span id="btn-crear-text">Crear Orden</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para asignar mecánico -->
+    <div class="modal-overlay" id="modal-asignar">
+        <div class="modal-box" style="max-width:480px;">
+            <h3>Asignar Mecánico <button class="modal-close" id="asignar-close">✕</button></h3>
+            <div class="form-field">
+                <label>Seleccionar mecánico</label>
+                <div class="sel-list" id="lista-mecanicos">
+                    <p class="sel-empty">Cargando mecánicos...</p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-dashboard" id="asignar-close2">Cancelar</button>
+                <button type="button" class="btn-dashboard btn-dashboard-primary" id="btn-confirmar-asignar" disabled>Asignar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para cancelar orden -->
+    <div class="modal-overlay" id="modal-cancelar">
+        <div class="modal-box" style="max-width:440px;">
+            <h3>Cancelar Orden <button class="modal-close" id="cancelar-close">✕</button></h3>
+            <div class="form-field">
+                <label for="motivo-cancelacion">Motivo de cancelación *</label>
+                <textarea id="motivo-cancelacion" rows="3"
+                    style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);
+                           border-radius:4px;color:var(--text-ivory);padding:10px 12px;font-family:inherit;font-size:13px;resize:vertical;"
+                    placeholder="Explica por qué se cancela esta orden..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-dashboard" id="cancelar-close2">Volver</button>
+                <button type="button" class="btn-dashboard btn-cancelar" id="btn-confirmar-cancelar">Confirmar Cancelación</button>
+            </div>
+        </div>
+    </div>
 
     <script src="../config.js"></script>
     <script src="../utils.js"></script>

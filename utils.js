@@ -17,21 +17,44 @@
         return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('es-CO');
     }
 
+    // Elimina tildes y pasa a minúsculas para comparaciones seguras.
+    // "Mecánico" → "mecanico", "MecanicoArea" → "mecanicoarea"
+    function normalizeStr(s) {
+        return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    }
+
     function formatRoleLabel(roles) {
-        const normalized = (roles || []).map((r) => String(r).toLowerCase());
-        if (normalized.some((r) => r.includes('admin'))) return 'Administrador';
-        if (normalized.some((r) => r.includes('jefetaller'))) return 'Jefe de Taller';
-        if (normalized.some((r) => r.includes('mecan'))) return 'Especialista';
-        if (normalized.some((r) => r.includes('recep'))) return 'Concierge';
-        if (normalized.some((r) => r.includes('almacen') || r.includes('bodega'))) return 'Almacén';
-        if (normalized.some((r) => r.includes('cliente'))) return 'Cliente';
+        const norm = (roles || []).map(normalizeStr);
+        if (norm.some((r) => r === 'admin'))                 return 'Administrador';
+        if (norm.some((r) => r === 'jefetaller'))            return 'Jefe de Taller';
+        if (norm.some((r) => r === 'mecanicodiagnostico'))   return 'Mecánico Diagnóstico';
+        if (norm.some((r) => r === 'mecanicoarea'))          return 'Mecánico de Área';
+        if (norm.some((r) => r.includes('mecanic')))         return 'Mecánico';
+        if (norm.some((r) => r === 'recepcionista'))         return 'Recepcionista';
+        if (norm.some((r) => r === 'jefealmacen'))           return 'Jefe de Almacén';
+        if (norm.some((r) => r === 'jefebodega'))            return 'Jefe de Bodega';
+        if (norm.some((r) => r === 'cliente'))               return 'Cliente';
         return 'Usuario';
     }
 
+    function getRoleColor(roles) {
+        const norm = (roles || []).map(normalizeStr);
+        if (norm.some((r) => r === 'admin'))               return '#e74c3c';
+        if (norm.some((r) => r === 'jefetaller'))          return '#f39c12';
+        if (norm.some((r) => r.includes('mecanic')))       return '#3498db';
+        if (norm.some((r) => r === 'recepcionista'))       return '#27ae60';
+        if (norm.some((r) => r.includes('almacen') || r.includes('bodega'))) return '#8e44ad';
+        if (norm.some((r) => r === 'cliente'))             return '#16a085';
+        return '#7f8c8d';
+    }
+
+    // hasRole: compara patrones contra roles normalizados (sin tildes, minúsculas).
+    // Ejemplos de uso: hasRole(roles, 'admin', 'jefetaller')
+    //                  hasRole(roles, 'mecan')  → captura Mecánico, MecanicoDiagnostico, MecanicoArea
     function hasRole(roles, ...patterns) {
-        const normalized = (roles || []).map((r) => String(r).toLowerCase());
+        const normalized = (roles || []).map(normalizeStr);
         return patterns.some((pattern) =>
-            normalized.some((role) => role.includes(String(pattern).toLowerCase()))
+            normalized.some((role) => role.includes(normalizeStr(pattern)))
         );
     }
 
@@ -116,7 +139,7 @@
     }
 
     window.AppUtils = {
-        escapeHtml, formatDate, formatRoleLabel, hasRole,
+        escapeHtml, formatDate, formatRoleLabel, getRoleColor, hasRole, normalizeStr,
         unwrapList, setPageMessage, setLoading, mapOrden,
         ESTADO_ORDEN,
     };

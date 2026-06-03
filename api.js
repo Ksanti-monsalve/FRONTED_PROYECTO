@@ -263,16 +263,28 @@
     const ordenes = {
         list: (params = {}) => requestList(
             `/api/Ordenes${buildQuery({
-                PageNumber: params.pagina ?? 1,
-                PageSize:   params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
+                PageNumber: params.pagina  ?? 1,
+                PageSize:   params.tamano  ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
+                ClienteId:  params.clienteId,
+                Estado:     params.estado,
             })}`
         ),
-        porMecanico: (mecanicoId) => requestList(`/api/Ordenes${buildQuery({ mecanicoId })}`),
-        porVehiculo: (vehiculoId) => requestList(`/api/Ordenes${buildQuery({ vehiculoId })}`),
-        create: (payload) => request('/api/Ordenes', { method: 'POST', body: JSON.stringify(payload) }),
-        cambiarEstado: (id, payload) => request(`/api/Ordenes/${id}/estado`, {
-            method: 'PATCH',
-            body: JSON.stringify(payload),
+        getById: (id) => request(`/api/Ordenes/${id}`),
+        // POST /api/Ordenes  — body: { ClienteId, VehiculoId, Descripcion?, TipoServicioId? }
+        crear: (payload) => request('/api/Ordenes', { method: 'POST', body: JSON.stringify(payload) }),
+        // POST /api/Ordenes/{id}/aprobar  — body: Guid clienteId (JSON)
+        aprobar: (id, clienteId) => request(`/api/Ordenes/${id}/aprobar`, {
+            method: 'POST', body: JSON.stringify(clienteId),
+        }),
+        // POST /api/Ordenes/{id}/asignar-mecanico  — body: Guid empleadoId (JSON)
+        asignarMecanico: (id, empleadoId) => request(`/api/Ordenes/${id}/asignar-mecanico`, {
+            method: 'POST', body: JSON.stringify(empleadoId),
+        }),
+        // POST /api/Ordenes/{id}/finalizar  — sin body
+        finalizar: (id) => request(`/api/Ordenes/${id}/finalizar`, { method: 'POST', body: '{}' }),
+        // POST /api/Ordenes/{id}/cancelar  — body: string motivo (JSON)
+        cancelar: (id, motivo) => request(`/api/Ordenes/${id}/cancelar`, {
+            method: 'POST', body: JSON.stringify(motivo),
         }),
     };
 
@@ -310,10 +322,15 @@
 
     const vehiculos = {
         list: (params = {}) => requestList(
-            `/api/Vehiculos${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 20 })}`
+            `/api/Vehiculos${buildQuery({
+                PageNumber: params.pagina ?? 1,
+                PageSize:   params.tamano ?? 20,
+                Placa:      params.placa,
+                Activo:     params.activo,
+            })}`
         ),
         getById: (id) => request(`/api/Vehiculos/${id}`),
-        create: (payload) => request('/api/Vehiculos', { method: 'POST', body: JSON.stringify(payload) }),
+        create:  (payload) => request('/api/Vehiculos', { method: 'POST', body: JSON.stringify(payload) }),
     };
 
     // ── Empleados ─────────────────────────────────────────────────────────────
@@ -324,11 +341,41 @@
         ),
     };
 
-    // ── Presupuestos (Mini Órdenes) ───────────────────────────────────────────
+    // ── Presupuestos (Mini Órdenes — Flujo M→J→C) ────────────────────────────
+    // Estados: 0=Borrador 1=EnRevisionJefe 2=AprobadaJefe 3=EnRevisionCliente
+    //          4=AprobadaCliente(OS!) 5=EnProceso 6=Completada 7=RechazadaJefe
+    //          8=RechazadaCliente 9=Cancelada
 
     const presupuestos = {
         list: (params = {}) => requestList(
-            `/api/MiniOrdenes${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 20 })}`
+            `/api/MiniOrdenes${buildQuery({
+                PageNumber:  params.pagina    ?? 1,
+                PageSize:    params.tamano    ?? 20,
+                Estado:      params.estado,
+                ClienteId:   params.clienteId,
+                MecanicoId:  params.mecanicoId,
+            })}`
+        ),
+        getById: (id) => request(`/api/MiniOrdenes/${id}`),
+        // Crear presupuesto — solo Mecánicos (MecanicoOnly)
+        // body: { ClienteId, VehiculoId, Descripcion, Observaciones?, Detalles[], ManosObra? }
+        crear: (payload) => request('/api/MiniOrdenes', { method: 'POST', body: JSON.stringify(payload) }),
+        // Mecánico envía a revisión del Jefe
+        enviarRevision: (id) => request(`/api/MiniOrdenes/${id}/enviar-revision`, { method: 'POST', body: '{}' }),
+        // Jefe aprueba o rechaza — body: { Aprobado: bool, Observacion?: string }
+        aprobarJefe: (id, aprobado, observacion) => request(`/api/MiniOrdenes/${id}/aprobacion-jefe`, {
+            method: 'POST',
+            body: JSON.stringify({ Aprobado: aprobado, Observacion: observacion ?? null }),
+        }),
+        // Cliente/Admin/Recepcionista aprueba o rechaza — genera OS si aprueba
+        aprobarCliente: (id, aprobado, observacion) => request(`/api/MiniOrdenes/${id}/aprobacion-cliente`, {
+            method: 'POST',
+            body: JSON.stringify({ Aprobado: aprobado, Observacion: observacion ?? null }),
+        }),
+        // Mecánico o Jefe marca como completado
+        completar: (id, observacion) => request(
+            `/api/MiniOrdenes/${id}/completar${observacion ? `?observacion=${encodeURIComponent(observacion)}` : ''}`,
+            { method: 'POST', body: '{}' }
         ),
     };
 
@@ -365,6 +412,7 @@
         modelos: (marcaId) => request(`/api/Catalogos/modelos${marcaId ? `?marcaId=${marcaId}` : ''}`, { auth: false }),
         colores: () => request('/api/Catalogos/colores', { auth: false }),
         tiposDocumento: () => request('/api/Catalogos/tipos-documento', { auth: false }),
+        tiposServicio: () => request('/api/Catalogos/tipos-servicio'),
     };
 
     // ── Auth extendido (registro de cliente) ──────────────────────────────────

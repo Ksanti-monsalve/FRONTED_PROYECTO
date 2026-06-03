@@ -17,7 +17,10 @@
         const logoutBtn = document.getElementById('btn-logout');
 
         if (userNameEl) userNameEl.textContent = user?.nombreUsuario || 'Usuario';
-        if (userRoleEl) userRoleEl.textContent = utils.formatRoleLabel(user?.roles);
+        if (userRoleEl) {
+            userRoleEl.textContent = utils.formatRoleLabel(user?.roles);
+            userRoleEl.style.color = utils.getRoleColor(user?.roles);
+        }
 
         if (navEl) {
             navEl.innerHTML = buildNavItems(user?.roles, active, api);
@@ -36,6 +39,14 @@
         return { user, api, utils };
     }
 
+    // Tabla de acceso alineada con las políticas del backend:
+    //   RecepcionOnly  → admin, recep, jefetaller
+    //   StaffOnly      → admin, recep, jefetaller, mecan  (Mecánico, MecanicoDiagnostico, MecanicoArea)
+    //   AlmacenOTaller → admin, jefetaller, almacen, bodega, mecan
+    //   AlmacenOnly    → admin, almacen, bodega
+    //   Reportes       → admin, jefetaller, almacen, bodega
+    //   ClienteOrAdmin → admin, recep, cliente
+    //   AdminOnly      → admin
     function buildNavItems(roles, active, api) {
         const links = [
             { key: 'dashboard',     label: 'Inicio',        route: 'dashboard',    roles: null },
@@ -46,7 +57,8 @@
             { key: 'empleados',     label: 'Mecánicos',      route: 'empleados',    roles: ['admin', 'jefetaller'] },
             { key: 'repuestos',     label: 'Inventario',     route: 'repuestos',    roles: ['admin', 'mecan', 'almacen', 'bodega', 'jefetaller'] },
             { key: 'proveedores',   label: 'Proveedores',    route: 'proveedores',  roles: ['admin', 'recep'] },
-            { key: 'facturas',      label: 'Facturas',       route: 'facturas',     roles: ['admin', 'recep', 'jefetaller'] },
+            // Facturas: RecepcionOnly + Reportes → admin, recep, jefetaller, almacen, bodega
+            { key: 'facturas',      label: 'Facturas',       route: 'facturas',     roles: ['admin', 'recep', 'jefetaller', 'almacen', 'bodega'] },
             { key: 'configuracion', label: 'Config',         route: 'configuracion',roles: ['admin'] },
         ];
 

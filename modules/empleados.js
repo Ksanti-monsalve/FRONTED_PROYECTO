@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // AdminOnly/JefeTallerOnly: solo Admin y JefeTaller gestionan empleados
+    if (!window.AppAuth?.requireRole('admin', 'jefetaller')) return;
+
     const ctx = window.AppLayout?.initAppLayout({ activeModule: 'empleados' });
     if (!ctx) return;
     const { api, utils } = ctx;
