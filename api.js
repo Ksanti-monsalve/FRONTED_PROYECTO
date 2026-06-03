@@ -286,6 +286,8 @@
         cancelar: (id, motivo) => request(`/api/Ordenes/${id}/cancelar`, {
             method: 'POST', body: JSON.stringify(motivo),
         }),
+        // DELETE /api/Ordenes/{id} — elimina permanentemente (soft delete)
+        eliminar: (id) => request(`/api/Ordenes/${id}`, { method: 'DELETE' }),
         // POST /api/Ordenes/{id}/detalles — agrega repuesto/insumo
         addDetalle: (id, payload) => request(`/api/Ordenes/${id}/detalles`, {
             method: 'POST', body: JSON.stringify(payload),
@@ -309,9 +311,10 @@
     const repuestos = {
         list: (params = {}) => requestList(
             `/api/Repuestos${buildQuery({
-                PageNumber: params.pagina ?? 1,
-                PageSize:   params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
-                Busqueda:   params.busqueda,
+                PageNumber:     params.pagina ?? 1,
+                PageSize:       params.tamano ?? window.APP_CONFIG?.pagination?.defaultPageSize ?? 20,
+                Busqueda:       params.busqueda,
+                TipoServicioId: params.tipoServicioId,
             })}`
         ),
         getById: (id) => request(`/api/Repuestos/${id}`),
@@ -344,12 +347,11 @@
     // ── Configuración ─────────────────────────────────────────────────────────
 
     const configuracion = {
-        list:       () => request('/api/Configuracion'),
-        update:     (clave, valor) => request(`/api/Configuracion/${encodeURIComponent(clave)}`, {
+        list:   () => request('/api/Catalogos/configuraciones'),
+        update: (clave, valor) => request(`/api/Catalogos/configuraciones/${encodeURIComponent(clave)}`, {
             method: 'PUT',
-            body: JSON.stringify({ valor }),
+            body: JSON.stringify({ Valor: valor }),
         }),
-        rateLimits: () => request('/api/Configuracion/rate-limits'),
     };
 
     // ── Vehículos ─────────────────────────────────────────────────────────────
@@ -361,6 +363,7 @@
                 PageSize:   params.tamano ?? 20,
                 Placa:      params.placa,
                 Activo:     params.activo,
+                ClienteId:  params.clienteId,
             })}`
         ),
         getById: (id) => request(`/api/Vehiculos/${id}`),
@@ -371,7 +374,12 @@
 
     const empleados = {
         list: (params = {}) => requestList(
-            `/api/Empleados${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 50, tipo: params.tipo })}`
+            `/api/Empleados${buildQuery({
+                PageNumber:     params.pagina ?? 1,
+                PageSize:       params.tamano ?? 50,
+                tipo:           params.tipo,
+                TipoServicioId: params.tipoServicioId,
+            })}`
         ),
     };
 
@@ -411,6 +419,8 @@
             `/api/MiniOrdenes/${id}/completar${observacion ? `?observacion=${encodeURIComponent(observacion)}` : ''}`,
             { method: 'POST', body: '{}' }
         ),
+        // Eliminar presupuesto (soft delete)
+        eliminar: (id) => request(`/api/MiniOrdenes/${id}`, { method: 'DELETE' }),
         // Gestión de repuestos en el presupuesto
         addDetalle: (id, payload) => request(`/api/MiniOrdenes/${id}/detalles`, {
             method: 'POST', body: JSON.stringify(payload),

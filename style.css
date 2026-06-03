@@ -1511,8 +1511,20 @@ body.dashboard-page .app-layout-header {
     border-color: var(--bronze-gold);
 }
 
+/* Fix global: fondo oscuro en todos los selects y sus opciones (Windows renderiza opciones con fondo blanco) */
+select {
+    background-color: #15161a;
+    color: #e8e4dc;
+}
+select option,
 .form-field select option {
-    background: #0a0b0d;
+    background-color: #15161a;
+    color: #e8e4dc;
+}
+select option:checked,
+select option:hover {
+    background-color: #2a2b30;
+    color: #c5a059;
 }
 
 /* Detail panel */

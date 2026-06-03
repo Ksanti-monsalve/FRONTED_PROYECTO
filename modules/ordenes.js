@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const puedeAsignar   = utils.hasRole(roles, 'admin', 'recep', 'jefetaller');
     const puedeFinalizar = utils.hasRole(roles, 'admin', 'jefetaller', 'mecan');
     const puedeCancelar  = utils.hasRole(roles, 'admin', 'recep', 'jefetaller');
+    const puedeEliminar  = utils.hasRole(roles, 'admin', 'jefetaller');
 
     // Elementos UI
     const container   = document.getElementById('table-container');
@@ -67,12 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const id    = raw.id ?? raw.Id ?? '';
 
             // Botones de acción según estado y rol
+            const tipoSvcId = raw.tipoServicioId ?? raw.TipoServicioId ?? '';
             let acciones = `<button class="btn-accion btn-detalle" data-id="${id}">Ver</button>`;
             if (o.estado === 'Pendiente'  && puedeAprobar)   acciones += `<button class="btn-accion btn-aprobar"   data-id="${id}" data-cliente="${raw.clienteId ?? raw.ClienteId ?? ''}">Aprobar</button>`;
-            if (o.estado === 'Aprobada'   && puedeAsignar)   acciones += `<button class="btn-accion btn-asignar"   data-id="${id}">Asignar Mec.</button>`;
+            if (o.estado === 'Aprobada'   && puedeAsignar)   acciones += `<button class="btn-accion btn-asignar"   data-id="${id}" data-tipo-svc="${tipoSvcId}">Asignar Mec.</button>`;
             if (o.estado === 'En Proceso' && puedeFinalizar) acciones += `<button class="btn-accion btn-finalizar" data-id="${id}">Finalizar</button>`;
             if (['Pendiente','Aprobada','En Proceso'].includes(o.estado) && puedeCancelar)
                                                               acciones += `<button class="btn-accion btn-cancelar"  data-id="${id}">Cancelar</button>`;
+            if (puedeEliminar)
+                acciones += `<button class="btn-accion btn-eliminar" data-id="${id}"
+                    style="border-color:#6b7280;color:#6b7280;font-size:10px">🗑</button>`;
 
             return `
             <tr>
@@ -108,11 +113,13 @@ document.addEventListener('DOMContentLoaded', () => {
         container.querySelectorAll('.btn-aprobar').forEach(btn =>
             btn.addEventListener('click', () => aprobarOrden(btn.dataset.id, btn.dataset.cliente)));
         container.querySelectorAll('.btn-asignar').forEach(btn =>
-            btn.addEventListener('click', () => abrirModalAsignar(btn.dataset.id)));
+            btn.addEventListener('click', () => abrirModalAsignar(btn.dataset.id, btn.dataset.tipoSvc)));
         container.querySelectorAll('.btn-finalizar').forEach(btn =>
             btn.addEventListener('click', () => finalizarOrden(btn.dataset.id)));
         container.querySelectorAll('.btn-cancelar').forEach(btn =>
             btn.addEventListener('click', () => abrirModalCancelar(btn.dataset.id)));
+        container.querySelectorAll('.btn-eliminar').forEach(btn =>
+            btn.addEventListener('click', () => eliminarOrden(btn.dataset.id)));
     }
 
     function renderPaginacion(total) {
@@ -138,17 +145,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let clienteSel     = null;   // { id, nombreCompleto, numeroDocumento }
     let vehiculoSel    = null;   // { id, placa, marcaModelo }
     let timerBusCliente = null;
-    let timerBusVeh     = null;
 
     function abrirModal() {
         stepActual  = 1;
         clienteSel  = null;
         vehiculoSel = null;
-        document.getElementById('buscar-cliente').value   = '';
-        document.getElementById('buscar-vehiculo').value  = '';
+        document.getElementById('buscar-cliente').value    = '';
         document.getElementById('descripcion-orden').value = '';
         document.getElementById('lista-clientes').innerHTML  = '<p class="sel-empty">Escribe para buscar clientes</p>';
-        document.getElementById('lista-vehiculos').innerHTML = '<p class="sel-empty">Escribe la placa para buscar</p>';
+        document.getElementById('lista-vehiculos').innerHTML = '<p class="sel-empty">Selecciona un cliente primero</p>';
         document.getElementById('step1-next').disabled = true;
         document.getElementById('step2-next').disabled = true;
         irAStep(1);
@@ -213,44 +218,47 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!clienteSel) return;
         document.getElementById('cliente-seleccionado-label').textContent = clienteSel.nombreCompleto;
         document.getElementById('resumen-cliente').textContent = clienteSel.nombreCompleto;
+        vehiculoSel = null;
+        document.getElementById('step2-next').disabled = true;
         irAStep(2);
+        cargarVehiculosCliente();
     });
 
-    // ── Paso 2: Buscar vehículo ──────────────────────────────────────────────
+    // ── Paso 2: Vehículos del cliente (carga automática) ─────────────────────
 
-    document.getElementById('buscar-vehiculo')?.addEventListener('input', e => {
-        clearTimeout(timerBusVeh);
-        const q = e.target.value.trim();
-        if (q.length < 2) {
-            document.getElementById('lista-vehiculos').innerHTML = '<p class="sel-empty">Escribe la placa del vehículo</p>';
-            return;
-        }
-        timerBusVeh = setTimeout(() => buscarVehiculos(q), 350);
-    });
-
-    async function buscarVehiculos(placa) {
-        document.getElementById('lista-vehiculos').innerHTML = '<p class="sel-empty">Buscando...</p>';
+    async function cargarVehiculosCliente() {
+        const lista = document.getElementById('lista-vehiculos');
+        lista.innerHTML = '<p class="sel-empty">Cargando vehículos...</p>';
         try {
-            const { items } = await api.vehiculos.list({ tamano: 10, placa });
+            const { items } = await api.vehiculos.list({ tamano: 50, clienteId: clienteSel?.id });
             if (!items?.length) {
-                document.getElementById('lista-vehiculos').innerHTML = '<p class="sel-empty">Sin resultados para esa placa</p>';
+                lista.innerHTML = `<p class="sel-empty" style="color:#f87171">
+                    Este cliente no tiene vehículos registrados a su nombre.<br>
+                    <small style="color:var(--text-muted)">Regístrele un vehículo primero.</small>
+                </p>`;
                 return;
             }
-            document.getElementById('lista-vehiculos').innerHTML = items.map(v => {
-                const pm = `${v.placa ?? v.Placa ?? ''}`;
-                const marca = `${v.marca ?? v.Marca ?? ''} ${v.modelo ?? v.Modelo ?? ''}`.trim();
-                const anio  = v.anio ?? v.Anio ?? '';
-                return `<div class="sel-item" data-id="${v.id ?? v.Id}" data-placa="${utils.escapeHtml(pm)}" data-mm="${utils.escapeHtml(marca)}">
-                    ${utils.escapeHtml(pm)} — ${utils.escapeHtml(marca)}
-                    <small>${utils.escapeHtml(String(anio))}</small>
-                </div>`;
-            }).join('');
-
-            document.querySelectorAll('#lista-vehiculos .sel-item').forEach(el =>
-                el.addEventListener('click', () => seleccionarVehiculo(el)));
+            renderListaVehiculos(lista, items);
         } catch (err) {
-            document.getElementById('lista-vehiculos').innerHTML = `<p class="sel-empty">Error: ${utils.escapeHtml(err.message)}</p>`;
+            lista.innerHTML = `<p class="sel-empty">Error al cargar: ${utils.escapeHtml(err.message)}</p>`;
         }
+    }
+
+    function renderListaVehiculos(lista, items) {
+        lista.innerHTML = items.map(v => {
+            const pm    = v.placa  ?? v.Placa  ?? '';
+            const marca = `${v.marca ?? v.Marca ?? ''} ${v.modelo ?? v.Modelo ?? ''}`.trim();
+            const anio  = v.anio   ?? v.Anio   ?? '';
+            const km    = v.kilometrajeActual ?? v.KilometrajeActual ?? 0;
+            return `<div class="sel-item" data-id="${v.id ?? v.Id}"
+                        data-placa="${utils.escapeHtml(pm)}" data-mm="${utils.escapeHtml(marca)}">
+                <strong style="color:var(--champagne-gold)">${utils.escapeHtml(pm)}</strong>
+                — ${utils.escapeHtml(marca)}
+                <small>${anio}${km ? ` · ${Number(km).toLocaleString('es-CO')} km` : ''}</small>
+            </div>`;
+        }).join('');
+        lista.querySelectorAll('.sel-item').forEach(el =>
+            el.addEventListener('click', () => seleccionarVehiculo(el)));
     }
 
     function seleccionarVehiculo(el) {
@@ -336,27 +344,59 @@ document.addEventListener('DOMContentLoaded', () => {
     let ordenIdAsignar = null;
     let mecanicoSel    = null;
 
-    async function abrirModalAsignar(ordenId) {
+    async function abrirModalAsignar(ordenId, tipoServicioId) {
         ordenIdAsignar = ordenId;
         mecanicoSel    = null;
         document.getElementById('btn-confirmar-asignar').disabled = true;
         document.getElementById('lista-mecanicos').innerHTML = '<p class="sel-empty">Cargando...</p>';
         modalAsignar.classList.add('open');
         try {
-            const { items } = await api.empleados.list({ tamano: 100 });
-            const mecanicos = (items ?? []).filter(e => [0,1,5,6].includes(e.tipoEmpleado ?? e.TipoEmpleado));
-            if (!mecanicos.length) { document.getElementById('lista-mecanicos').innerHTML = '<p class="sel-empty">No hay mecánicos registrados</p>'; return; }
+            // Si la orden tiene tipo de servicio, filtrar mecánicos especializados + generales
+            const params = { tamano: 100 };
+            if (tipoServicioId) params.tipoServicioId = tipoServicioId;
 
-            const tipo = { 0:'Mecánico', 1:'Eléctrico', 5:'Diagnóstico', 6:'Área' };
-            document.getElementById('lista-mecanicos').innerHTML = mecanicos.map(m => {
+            const { items } = await api.empleados.list(params);
+            const mecanicos = (items ?? []).filter(e => [0,1,5,6].includes(e.tipoEmpleado ?? e.TipoEmpleado));
+
+            if (!mecanicos.length) {
+                document.getElementById('lista-mecanicos').innerHTML =
+                    '<p class="sel-empty">No hay mecánicos disponibles para este tipo de servicio.</p>';
+                return;
+            }
+
+            const tipoLabel = { 0:'Mecánico', 1:'Eléctrico', 5:'Diagnóstico', 6:'Área' };
+
+            // Separar: especializados (tienen TipoServicioId = el de la orden) vs generales
+            const especializados = tipoServicioId
+                ? mecanicos.filter(m => (m.tipoServicioId ?? m.TipoServicioId) === tipoServicioId)
+                : [];
+            const generales = mecanicos.filter(m => !(m.tipoServicioId ?? m.TipoServicioId) ||
+                (m.tipoServicioId ?? m.TipoServicioId) !== tipoServicioId);
+
+            const renderMec = (m, destacado) => {
                 const nombre = `${m.nombres ?? m.Nombres ?? ''} ${m.apellidos ?? m.Apellidos ?? ''}`.trim();
-                const t      = tipo[m.tipoEmpleado ?? m.TipoEmpleado] ?? 'Técnico';
+                const t      = tipoLabel[m.tipoEmpleado ?? m.TipoEmpleado] ?? 'Técnico';
                 const esp    = m.especialidad ?? m.Especialidad ?? 'Sin especialidad';
-                return `<div class="sel-item" data-id="${m.id ?? m.Id}">
+                return `<div class="sel-item" data-id="${m.id ?? m.Id}"
+                    style="${destacado ? 'border-left:3px solid var(--bronze-gold);' : ''}">
+                    ${destacado ? '<span style="font-size:10px;color:var(--bronze-gold);margin-right:6px">★</span>' : ''}
                     ${utils.escapeHtml(nombre)}
                     <small>${t} · ${utils.escapeHtml(esp)}</small>
                 </div>`;
-            }).join('');
+            };
+
+            let html = '';
+            if (especializados.length) {
+                html += `<p style="font-size:10px;color:var(--bronze-gold);padding:6px 14px;margin:0;letter-spacing:.08em">ESPECIALIZADOS EN ESTE SERVICIO</p>`;
+                html += especializados.map(m => renderMec(m, true)).join('');
+            }
+            if (generales.length) {
+                if (especializados.length)
+                    html += `<p style="font-size:10px;color:var(--text-muted);padding:6px 14px;margin:0;letter-spacing:.08em">OTROS TÉCNICOS</p>`;
+                html += generales.map(m => renderMec(m, false)).join('');
+            }
+
+            document.getElementById('lista-mecanicos').innerHTML = html;
 
             document.querySelectorAll('#lista-mecanicos .sel-item').forEach(el =>
                 el.addEventListener('click', () => {
@@ -708,6 +748,18 @@ document.addEventListener('DOMContentLoaded', () => {
             modalAddMano.classList.remove('open');
         }
     });
+
+    // ── Eliminar orden ────────────────────────────────────────────────────────
+    async function eliminarOrden(ordenId) {
+        if (!confirm('¿Eliminar esta orden permanentemente? Esta acción no se puede deshacer.\n\nNota: no se puede eliminar si ya tiene una factura generada.')) return;
+        try {
+            await api.ordenes.eliminar(ordenId);
+            utils.setPageMessage(messageEl, 'success', '✓ Orden eliminada correctamente.');
+            cargarOrdenes();
+        } catch (err) {
+            utils.setPageMessage(messageEl, 'error', err.message);
+        }
+    }
 
     // ── Arranque ─────────────────────────────────────────────────────────────
     cargarOrdenes();

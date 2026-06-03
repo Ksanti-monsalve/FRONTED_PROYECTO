@@ -38,13 +38,14 @@
         /* ── Filtros ──────────────────────────────────────────────────── */
         .filtros-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
         .filtros-bar select, .filtros-bar input {
-            background: rgba(255,255,255,.04); border: 1px solid var(--gold-border);
+            background: #1a1b1f; border: 1px solid var(--gold-border);
             color: var(--text-ivory); padding: 6px 12px; border-radius:4px;
             font-size:12px; font-family:inherit;
         }
         .filtros-bar select:focus, .filtros-bar input:focus {
             outline:none; border-color: var(--bronze-gold);
         }
+        .filtros-bar select option { background:#15161a; color:#e8e4dc; }
 
         /* ── Detalle de orden ─────────────────────────────────────── */
         .detalle-section { margin-bottom:20px; }
@@ -210,11 +211,10 @@
                     Cliente: <strong id="cliente-seleccionado-label" style="color:var(--text-ivory)">—</strong>
                 </p>
                 <div class="form-field">
-                    <label>Buscar vehículo (placa)</label>
-                    <input type="text" id="buscar-vehiculo" placeholder="Placa del vehículo..." autocomplete="off">
-                </div>
-                <div class="sel-list" id="lista-vehiculos">
-                    <p class="sel-empty">Escribe la placa para buscar</p>
+                    <label>Vehículos del cliente</label>
+                    <div class="sel-list" id="lista-vehiculos" style="max-height:260px;">
+                        <p class="sel-empty">Cargando vehículos...</p>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-dashboard" id="step2-back">← Atrás</button>
@@ -354,19 +354,19 @@
             <div class="form-grid" style="grid-template-columns:1fr;">
                 <div class="form-field">
                     <label>Repuesto *</label>
-                    <select id="sel-repuesto" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                    <select id="sel-repuesto" style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
                         <option value="">Cargando repuestos...</option>
                     </select>
                 </div>
                 <div class="form-field">
                     <label for="add-cantidad">Cantidad *</label>
                     <input type="number" id="add-cantidad" min="1" value="1"
-                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                        style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
                 </div>
                 <div class="form-field">
                     <label for="add-precio-unitario">Precio Unitario *</label>
                     <input type="number" id="add-precio-unitario" min="0" step="0.01" placeholder="0.00"
-                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                        style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
                 </div>
             </div>
             <div class="modal-actions">
@@ -384,22 +384,22 @@
                 <div class="form-field">
                     <label for="add-mano-descripcion">Descripción del trabajo *</label>
                     <textarea id="add-mano-descripcion" rows="2"
-                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;resize:vertical;"
+                        style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;resize:vertical;"
                         placeholder="Ej: Cambio de aceite y filtro, diagnóstico de frenos..."></textarea>
                 </div>
                 <div class="form-field">
                     <label for="add-mano-costo">Costo mano de obra *</label>
                     <input type="number" id="add-mano-costo" min="0" step="0.01" placeholder="0.00"
-                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                        style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
                 </div>
                 <div class="form-field">
                     <label for="add-mano-horas">Horas trabajadas</label>
                     <input type="number" id="add-mano-horas" min="0" step="0.5" value="1"
-                        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                        style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
                 </div>
                 <div class="form-field">
                     <label>Mecánico (opcional)</label>
-                    <select id="sel-mecanico-mano" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--gold-border);color:var(--text-ivory);padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
+                    <select id="sel-mecanico-mano" style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;">
                         <option value="">Sin asignar</option>
                     </select>
                 </div>

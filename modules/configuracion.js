@@ -28,63 +28,78 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function renderConfigTable(container, items, utils, api, messageEl) {
-    const list = Array.isArray(items) ? items : [];
+    // El backend devuelve { data: [...] } o el array directo
+    const raw  = items?.data ?? items;
+    const list = Array.isArray(raw) ? raw : [];
+
     if (!list.length) {
-        container.innerHTML = '<p class="table-empty">No hay configuraciones.</p>';
+        container.innerHTML = '<p class="table-empty">No hay configuraciones registradas.</p>';
         return;
     }
 
-    container.innerHTML = `
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Clave</th>
-                    <th>Valor</th>
-                    <th>Grupo</th>
-                    <th>Editable</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                ${list.map((cfg) => `
-                    <tr data-clave="${utils.escapeHtml(cfg.clave)}">
-                        <td>${utils.escapeHtml(cfg.clave)}</td>
-                        <td>
-                            <input
-                                class="config-input"
-                                type="text"
-                                value="${utils.escapeHtml(cfg.valor)}"
-                                ${cfg.esEditable ? '' : 'disabled'}
-                            />
+    // Agrupar por grupo
+    const grupos = {};
+    list.forEach(cfg => {
+        const g = cfg.grupo ?? cfg.Grupo ?? 'General';
+        if (!grupos[g]) grupos[g] = [];
+        grupos[g].push(cfg);
+    });
+
+    let html = '';
+    for (const [grupo, cfgs] of Object.entries(grupos)) {
+        html += `<div style="margin-bottom:20px">
+            <h4 style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--bronze-gold);
+                margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--gold-border);">${utils.escapeHtml(grupo)}</h4>
+            <table class="data-table">
+                <thead><tr>
+                    <th>Clave</th><th>Descripción</th><th>Valor</th><th></th>
+                </tr></thead>
+                <tbody>
+                ${cfgs.map(cfg => {
+                    const clave = cfg.clave ?? cfg.Clave ?? '';
+                    const valor = cfg.valor ?? cfg.Valor ?? '';
+                    const desc  = cfg.descripcion ?? cfg.Descripcion ?? '—';
+                    const editable = cfg.esEditable ?? cfg.EsEditable ?? true;
+                    return `<tr data-clave="${utils.escapeHtml(clave)}">
+                        <td style="font-family:monospace;font-size:12px;color:var(--champagne-gold)">${utils.escapeHtml(clave)}</td>
+                        <td style="color:var(--text-muted);font-size:12px">${utils.escapeHtml(desc)}</td>
+                        <td><input class="config-input" type="text"
+                            value="${utils.escapeHtml(valor)}"
+                            ${editable ? '' : 'disabled'}
+                            style="background:rgba(255,255,255,.04);border:1px solid var(--gold-border);
+                                   color:var(--text-ivory);padding:5px 10px;border-radius:4px;
+                                   font-family:inherit;font-size:13px;width:100%;max-width:280px;" />
                         </td>
-                        <td>${utils.escapeHtml(cfg.grupoConfig || '—')}</td>
-                        <td>${cfg.esEditable ? 'Sí' : 'No'}</td>
-                        <td>
-                            ${cfg.esEditable
-                                ? `<button type="button" class="btn-dashboard btn-save-config">Guardar</button>`
-                                : '—'}
+                        <td>${editable
+                            ? `<button type="button" class="btn-dashboard btn-save-config"
+                                style="padding:4px 12px;font-size:11px;">Guardar</button>`
+                            : '<span style="color:var(--text-muted);font-size:11px">Solo lectura</span>'}
                         </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+                    </tr>`;
+                }).join('')}
+                </tbody>
+            </table>
+        </div>`;
+    }
+    container.innerHTML = html;
 
     container.querySelectorAll('.btn-save-config').forEach((btn) => {
         btn.addEventListener('click', async () => {
-            const row = btn.closest('tr');
+            const row   = btn.closest('tr');
             const clave = row?.getAttribute('data-clave');
             const input = row?.querySelector('.config-input');
             if (!clave || !input) return;
 
-            btn.disabled = true;
+            btn.disabled    = true;
+            btn.textContent = 'Guardando...';
             try {
                 await api.configuracion.update(clave, input.value);
                 utils.setPageMessage(messageEl, 'success', `Configuración "${clave}" actualizada.`);
             } catch (err) {
                 utils.setPageMessage(messageEl, 'error', err.message);
             } finally {
-                btn.disabled = false;
+                btn.disabled    = false;
+                btn.textContent = 'Guardar';
             }
         });
     });

@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('modal-nuevo-repuesto');
         let categoriasCache = [];
 
+        let tiposServCache = [];
+
         async function abrirModalRepuesto() {
             ['rep-codigo','rep-nombre','rep-descripcion','rep-unidad'].forEach(id => {
                 const el = document.getElementById(id); if (el) el.value = '';
@@ -57,23 +59,27 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('rep-stock-minimo').value  = '1';
             modal.classList.add('open');
 
-            if (!categoriasCache.length) {
-                try {
-                    const resp = await api.catalogos.categoriasRepuesto
-                        ? api.catalogos.categoriasRepuesto()
-                        : api.request('/api/Catalogos/categorias-repuesto');
-                    const items = (resp?.data ?? resp ?? []);
-                    categoriasCache = Array.isArray(items) ? items : [];
-                } catch { categoriasCache = []; }
-            }
+            // Cargar categorías y tipos de servicio en paralelo
+            const [cats, tipos] = await Promise.all([
+                categoriasCache.length ? Promise.resolve(categoriasCache) :
+                    api.catalogos.categoriasRepuesto().then(r => {
+                        categoriasCache = Array.isArray(r?.data ?? r) ? (r?.data ?? r) : [];
+                        return categoriasCache;
+                    }).catch(() => []),
+                tiposServCache.length ? Promise.resolve(tiposServCache) :
+                    api.catalogos.tiposServicio().then(r => {
+                        tiposServCache = Array.isArray(r?.data ?? r) ? (r?.data ?? r) : [];
+                        return tiposServCache;
+                    }).catch(() => []),
+            ]);
 
-            const sel = document.getElementById('rep-categoria');
-            if (categoriasCache.length) {
-                sel.innerHTML = '<option value="">— Seleccionar categoría —</option>' +
-                    categoriasCache.map(c => `<option value="${c.id ?? c.Id}">${utils.escapeHtml(c.nombre ?? c.Nombre ?? '')}</option>`).join('');
-            } else {
-                sel.innerHTML = '<option value="">Sin categorías disponibles</option>';
-            }
+            const selCat = document.getElementById('rep-categoria');
+            selCat.innerHTML = '<option value="">— Seleccionar categoría —</option>' +
+                cats.map(c => `<option value="${c.id??c.Id}">${utils.escapeHtml(c.nombre??c.Nombre??'')}</option>`).join('');
+
+            const selTipo = document.getElementById('rep-tipo-servicio');
+            selTipo.innerHTML = '<option value="">General (aplica a todos)</option>' +
+                tipos.map(t => `<option value="${t.id??t.Id}">${utils.escapeHtml(t.nombre??t.Nombre??'')}</option>`).join('');
         }
 
         document.getElementById('btn-nuevo-repuesto')?.addEventListener('click', abrirModalRepuesto);
@@ -97,12 +103,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const tipoServId = document.getElementById('rep-tipo-servicio')?.value || null;
+
             try {
                 document.getElementById('rep-guardar').disabled = true;
                 document.getElementById('rep-guardar').textContent = 'Guardando...';
                 await api.repuestos.create({
                     Codigo: codigo, Nombre: nombre, Descripcion: descripcion,
                     CategoriaRepuestoId: categoriaId,
+                    TipoServicioId: tipoServId || null,
                     PrecioCompra: precioC, PrecioVenta: precioV,
                     StockActual: stockAct, StockMinimo: stockMin,
                     Unidad: unidad,
