@@ -788,12 +788,18 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('btn-confirmar-factura').disabled = false;
             const subtotal = ordenes.reduce((s, o) => s + Number(o.total ?? 0), 0);
 
-            const filasOrdenes = ordenes.map(o => `
-                <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
-                    <td style="padding:4px 6px;color:var(--bronze-gold)">${utils.escapeHtml(o.numeroOrden)}</td>
-                    <td style="padding:4px 6px;font-size:11px;color:var(--text-muted)">${utils.escapeHtml((o.descripcion||'').substring(0,35))}</td>
-                    <td style="padding:4px 6px;text-align:right">$${Number(o.total ?? 0).toLocaleString('es-CO')}</td>
-                </tr>`).join('');
+            const filasOrdenes = ordenes.map(o => {
+                const total   = Number(o.total    ?? 0);
+                const subRep  = Number(o.subRepuestos ?? 0);
+                const subMO   = Number(o.subManoObra  ?? 0);
+                return `<tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+                    <td style="padding:4px 6px;color:var(--bronze-gold);white-space:nowrap">${utils.escapeHtml(o.numeroOrden)}</td>
+                    <td style="padding:4px 6px;font-size:11px;color:var(--text-muted)">${utils.escapeHtml((o.descripcion||'').substring(0,30))}</td>
+                    <td style="padding:4px 6px;text-align:right;font-size:11px;color:var(--text-muted)">Rep: $${subRep.toLocaleString('es-CO')}</td>
+                    <td style="padding:4px 6px;text-align:right;font-size:11px;color:var(--text-muted)">MO: $${subMO.toLocaleString('es-CO')}</td>
+                    <td style="padding:4px 6px;text-align:right;font-weight:600">$${total.toLocaleString('es-CO')}</td>
+                </tr>`;
+            }).join('');
 
             document.getElementById('factura-resumen').innerHTML = `
                 <p style="font-size:11px;color:var(--bronze-gold);margin-bottom:8px;letter-spacing:.06em">
