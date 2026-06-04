@@ -24,6 +24,34 @@
 
         if (navEl) {
             navEl.innerHTML = buildNavItems(user?.roles, active, api);
+
+            // ── Hamburger menu para móvil ───────────────────────────────────
+            const header = navEl.closest('.app-layout-header');
+            if (header && !header.querySelector('.nav-hamburger')) {
+                const ham = document.createElement('button');
+                ham.className = 'nav-hamburger';
+                ham.setAttribute('aria-label', 'Menú');
+                ham.innerHTML = `<span></span><span></span><span></span>`;
+                ham.style.cssText = `
+                    display:none; background:none; border:1px solid var(--gold-border);
+                    border-radius:3px; padding:6px 8px; cursor:pointer; flex-direction:column;
+                    gap:4px; align-items:center; justify-content:center;`;
+                ham.addEventListener('click', () => {
+                    navEl.classList.toggle('nav-open');
+                    ham.classList.toggle('open');
+                });
+                // Insertar antes del nav
+                header.insertBefore(ham, navEl);
+
+                // Mostrar hamburger solo en móvil
+                const mq = window.matchMedia('(max-width: 768px)');
+                const toggleHam = (e) => {
+                    ham.style.display = e.matches ? 'flex' : 'none';
+                    if (!e.matches) navEl.classList.remove('nav-open');
+                };
+                mq.addEventListener('change', toggleHam);
+                toggleHam(mq);
+            }
         }
 
         logoutBtn?.addEventListener('click', async () => {
@@ -32,9 +60,8 @@
             api.replaceTo('login');
         });
 
-        if (apiStatusEl && options.checkHealth !== false) {
-            checkApiHealth(api, apiStatusEl);
-        }
+        // Health check desactivado — no mostrar URL del backend en producción
+        if (apiStatusEl) apiStatusEl.style.display = 'none';
 
         return { user, api, utils };
     }

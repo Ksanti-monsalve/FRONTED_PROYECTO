@@ -52,16 +52,23 @@
     padding: 0;
 }
 
-html, body {
+html {
     width: 100%;
     height: 100%;
     background-color: var(--bg-obsidian);
+}
+
+body {
+    width: 100%;
+    min-height: 100%;
+    background-color: var(--bg-obsidian);
     color: var(--text-ivory);
     font-family: var(--font-sans);
-    overflow: hidden;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* overflow gestionado por cada tipo de página */
+    overflow-x: hidden;
 }
 
 /* Luxury Fine Scrollbar */
@@ -84,26 +91,32 @@ html, body {
    3. LUXURY BACKGROUND MESH & LAYERS
    -------------------------------------------------------------------------- */
 .luxury-bg-mesh {
-    position: absolute;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    /* Imagen de fondo: taller automotriz oscuro */
+    background-image:
+        linear-gradient(to bottom,
+            rgba(6,7,8,0.88) 0%,
+            rgba(6,7,8,0.82) 40%,
+            rgba(6,7,8,0.92) 100%),
+        url('https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1920&q=70&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center 30%;
+    background-attachment: fixed;
+    pointer-events: none;
+}
+
+.luxury-scanlines {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     z-index: 1;
-    background: 
-        radial-gradient(circle at 10% 20%, rgba(255, 210, 0, 0.035) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(255, 210, 0, 0.02) 0%, transparent 40%),
-        radial-gradient(circle at 50% 50%, rgba(8, 9, 12, 0.7) 0%, var(--bg-obsidian) 100%);
-    pointer-events: none;
-}
-
-.luxury-scanlines {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
     background-image: 
         linear-gradient(rgba(255, 255, 255, 0.002) 1px, transparent 1px);
     background-size: 100% 6px;
@@ -998,12 +1011,14 @@ body.dashboard-page {
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-    padding: 32px 40px 48px;
+    /* Sin padding-top — el header sticky ocupa ese espacio */
+    padding: 0 0 48px;
 }
 
 .dashboard-shell {
     max-width: 1100px;
     margin: 0 auto;
+    padding: 0 40px;
     display: flex;
     flex-direction: column;
     gap: 32px;
@@ -1151,16 +1166,16 @@ body.dashboard-page {
 
 /* Layout app (header + nav) */
 .app-layout-header {
-    max-width: 1200px;
-    margin: 0 auto 16px;
-    padding: 0 40px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 16px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
     border-bottom: 1px solid var(--gold-border);
-    padding-bottom: 20px;
 }
 
 .layout-brand h1 {
@@ -1214,10 +1229,7 @@ body.dashboard-page {
 }
 
 .api-status {
-    max-width: 1200px;
-    margin: 0 auto 20px;
-    padding: 0 40px;
-    font-size: 12px;
+    display: none !important;
 }
 
 .api-status-ok { color: var(--accent-emerald); }
@@ -1410,26 +1422,163 @@ body.dashboard-page {
 
 .module-page .dashboard-shell {
     max-width: 1200px;
+    padding-left: 40px;
+    padding-right: 40px;
 }
 
-@media (max-width: 900px) {
-    body.dashboard-page {
-        padding: 24px 20px 40px;
+@media (max-width: 1024px) {
+    .module-page .dashboard-shell { padding-left: 24px; padding-right: 24px; }
+}
+@media (max-width: 768px) {
+    .module-page .dashboard-shell { padding-left: 16px; padding-right: 16px; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile-first breakpoints
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet: 768px–1024px ──────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .app-layout-header  { padding: 12px 24px; }
+    .dashboard-shell    { padding: 20px 24px 40px; }
+
+    .dashboard-grid     { grid-template-columns: 1fr; }
+    .stats-grid         { grid-template-columns: repeat(2, 1fr); }
+
+    .data-table th,
+    .data-table td      { padding: 8px 10px; font-size: 12px; }
+}
+
+/* ── Hamburger menu (inyectado por layout.js) ──────────────────── */
+.nav-hamburger span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--bronze-gold);
+    border-radius: 1px;
+    transition: all 0.25s;
+}
+.nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+/* Nav en móvil: desplegable */
+@media (max-width: 768px) {
+    .layout-nav:not(.nav-open) {
+        display: none;
+    }
+    .layout-nav.nav-open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(6,7,8,0.98);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--gold-border);
+        padding: 12px 16px;
+        gap: 4px;
+        z-index: 300;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    }
+    .layout-nav.nav-open .layout-nav-link {
+        padding: 10px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    .app-layout-header {
+        position: relative;
+    }
+}
+
+/* ── Mobile: < 768px ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* Header: apilar en dos filas */
+    .app-layout-header {
+        padding: 12px 16px;
+        gap: 10px;
+    }
+    .layout-brand { flex: 1; min-width: 0; }
+    .layout-brand h1 { font-size: 1.1rem; }
+    .layout-brand .brand-tagline { font-size: 9px; }
+
+    /* User: compacto */
+    .layout-user        { gap: 8px; }
+    .layout-user-name   { font-size: 12px; }
+    .layout-user-role   { display: none; }
+
+    /* Shell */
+    .dashboard-shell    { padding: 16px 16px 40px; gap: 16px; }
+    body.dashboard-page .dashboard-shell { padding-top: 16px; }
+
+    /* Cards */
+    .dashboard-card     { padding: 16px; }
+    .section-toolbar    { flex-wrap: wrap; gap: 8px; }
+    .section-toolbar h2 { font-size: 14px; }
+
+    /* Stats */
+    .stats-grid         { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-value         { font-size: 1.4rem; }
+
+    /* Tablas — scroll horizontal en móvil */
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .data-table {
+        min-width: 600px;
+    }
+    .data-table th,
+    .data-table td {
+        padding: 8px 8px;
+        font-size: 11px;
     }
 
-    .app-layout-header,
-    .api-status {
-        padding-left: 20px;
-        padding-right: 20px;
+    /* Modales — ocupan toda la pantalla */
+    .modal-overlay      { padding: 8px; align-items: flex-end; }
+    .modal-box {
+        max-width: 100% !important;
+        width: 100%;
+        max-height: 92vh;
+        border-radius: 12px 12px 0 0;
+        padding: 20px 16px;
+        margin-bottom: 0;
     }
 
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
+    /* Filtros */
+    .filtros-bar        { gap: 6px; }
+    .filtros-bar select,
+    .filtros-bar input  { font-size: 11px; padding: 5px 8px; }
 
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
+    /* Botones de acción en tabla */
+    .btn-accion         { font-size: 10px; padding: 2px 6px; }
+
+    /* Grids de formulario */
+    .form-grid          { grid-template-columns: 1fr !important; }
+
+    /* Metodo pago cards */
+    .metodo-grid        { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* Quick roles */
+    .roles-chips        { gap: 6px 10px; }
+    .role-chip          { font-size: 10px; }
+
+    /* Presupuesto tarjeta */
+    .servicio-card-header { flex-wrap: wrap; gap: 8px; }
+    .servicio-precio    { width: 100%; text-align: right; }
+    .servicio-decision  { flex-direction: column; gap: 6px; }
+    .btn-si, .btn-no    { font-size: 11px; padding: 10px; }
+}
+
+/* ── Small mobile: < 480px ─────────────────────────────────────── */
+@media (max-width: 480px) {
+    .stats-grid         { grid-template-columns: 1fr; }
+    .modal-box          { padding: 16px 12px; }
+    .metodo-grid        { grid-template-columns: 1fr; }
+    .card-row           { grid-template-columns: 1fr !important; }
+    .layout-user .btn-dashboard { padding: 6px 10px; font-size: 10px; }
 }
 
 /* Fix: content must appear above background overlays */
@@ -1441,20 +1590,31 @@ body.dashboard-page {
     z-index: 3;
 }
 
-/* Sticky header for module pages */
+/* ── Header sticky — completamente fijo en la parte superior ─────────── */
 body.dashboard-page .app-layout-header {
     position: sticky;
     top: 0;
-    background: var(--bg-obsidian);
-    z-index: 100;
-    padding-top: 20px;
+    /* Fondo sólido con ligero blur para cubrir el contenido al scrollear */
+    background: rgba(6, 7, 8, 0.97);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 200;
+    padding-top: 16px;
+    padding-bottom: 16px;
     border-bottom: 1px solid var(--gold-border);
-    margin-bottom: 24px;
+    margin-bottom: 0;
+    /* Sombra sutil para separar del contenido */
+    box-shadow: 0 2px 20px rgba(0,0,0,0.6);
 }
 
-/* Slightly more visible cards */
+/* El shell empieza con padding-top después del header */
+body.dashboard-page .dashboard-shell {
+    padding-top: 28px;
+}
+
+/* Cards más opacas para legibilidad con la imagen de fondo */
 .dashboard-card {
-    background: rgba(18, 20, 26, 0.92);
+    background: rgba(10, 11, 14, 0.94);
 }
 
 /* Section toolbar */
