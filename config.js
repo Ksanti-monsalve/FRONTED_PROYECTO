@@ -12,6 +12,7 @@ window.APP_CONFIG = {
         repuestos:      '/modules/repuestos.html',
         proveedores:    '/modules/proveedores.html',
         facturas:       '/modules/facturas.html',
+        'mis-facturas': '/modules/mis-facturas.html',
         configuracion:  '/modules/configuracion.html',
     },
     redirectDelayMs: 1400,

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Facturas — AutoTallerManager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .badge-pagada   { background:rgba(34,197,94,.18);  color:#4ade80; }
+        .badge-pendiente{ background:rgba(234,179,8,.18);  color:#fbbf24; }
+
+        /* ── Modales ── */
+        .modal-overlay { display:none; position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.85); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:20px; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#0d0e11; border:1px solid var(--gold-border); border-radius:8px; padding:32px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; }
+        .modal-box h3 { font-family:var(--font-serif); font-size:1.1rem; font-weight:400; color:var(--champagne-gold); margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--gold-border); }
+        .modal-close { float:right; background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer; }
+        .modal-close:hover { color:var(--text-ivory); }
+        .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+
+        /* ── Selector de método ── */
+        .metodo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0; }
+        .metodo-btn {
+            display:flex; flex-direction:column; align-items:center; gap:8px;
+            padding:16px 8px; border:1px solid var(--gold-border); border-radius:6px;
+            background:rgba(255,255,255,.03); cursor:pointer; transition:all .2s;
+            color:var(--text-muted); font-size:11px; letter-spacing:.06em;
+        }
+        .metodo-btn:hover { border-color:var(--bronze-gold); color:var(--champagne-gold); background:rgba(197,160,89,.08); }
+        .metodo-btn.selected { border-color:var(--champagne-gold); color:var(--champagne-gold); background:rgba(197,160,89,.12); }
+        .metodo-btn .icon { font-size:24px; }
+
+        /* ── Formulario tarjeta ── */
+        .card-visual {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            border-radius:12px; padding:20px 24px; margin-bottom:20px;
+            border:1px solid rgba(197,160,89,.3); position:relative; overflow:hidden;
+        }
+        .card-visual::before { content:''; position:absolute; top:-50%; right:-20%; width:200px; height:200px; background:rgba(197,160,89,.05); border-radius:50%; }
+        .card-chip { width:36px; height:28px; background:linear-gradient(135deg,#c5a059,#ffd700); border-radius:4px; margin-bottom:16px; }
+        .card-number-display { font-size:18px; letter-spacing:.2em; color:#e8e4dc; font-family:monospace; margin-bottom:12px; }
+        .card-info { display:flex; justify-content:space-between; font-size:11px; color:rgba(232,228,220,.6); letter-spacing:.08em; }
+
+        .card-input {
+            width:100%; background:#1a1b1f; border:1px solid var(--gold-border);
+            color:#e8e4dc; padding:10px 14px; border-radius:4px;
+            font-family:inherit; font-size:13px; margin-top:4px;
+        }
+        .card-input:focus { outline:none; border-color:var(--bronze-gold); }
+        .card-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+        /* ── PSE ── */
+        .pse-logo { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding:12px; background:rgba(255,255,255,.04); border-radius:6px; border:1px solid var(--gold-border); }
+        .pse-badge { background:linear-gradient(135deg,#e31837,#c00); color:white; padding:4px 10px; border-radius:3px; font-size:13px; font-weight:700; letter-spacing:.1em; }
+        .bank-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; max-height:200px; overflow-y:auto; margin:10px 0; }
+        .bank-item { padding:10px 12px; border:1px solid var(--gold-border); border-radius:4px; cursor:pointer; font-size:12px; color:var(--text-muted); transition:all .2s; text-align:center; }
+        .bank-item:hover { border-color:var(--bronze-gold); color:var(--champagne-gold); background:rgba(197,160,89,.06); }
+        .bank-item.selected { border-color:var(--champagne-gold); background:rgba(197,160,89,.12); color:var(--champagne-gold); font-weight:600; }
+
+        /* ── Token confirmación ── */
+        .token-display {
+            background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.3);
+            border-radius:8px; padding:20px; text-align:center; margin:16px 0;
+        }
+        .token-code { font-family:monospace; font-size:18px; font-weight:700; color:#4ade80; letter-spacing:.1em; margin:8px 0; }
+
+        /* ── Efectivo info ── */
+        .efectivo-info { background:rgba(234,179,8,.08); border:1px solid rgba(234,179,8,.3); border-radius:8px; padding:16px; margin:12px 0; }
+        .efectivo-info p { font-size:12px; color:var(--text-ivory); margin:4px 0; }
+        .efectivo-info .monto { font-size:20px; font-weight:700; color:#fbbf24; margin:8px 0; }
+    </style>
+</head>
+<body class="dashboard-page module-page">
+    <div class="luxury-bg-mesh"></div>
+
+    <header class="app-layout-header">
+        <div class="layout-brand">
+            <span class="brand-tagline">AutoTallerManager</span>
+            <h1>Mis Facturas</h1>
+        </div>
+        <nav class="layout-nav" id="layout-nav"></nav>
+        <div class="layout-user">
+            <div>
+                <p class="layout-user-name" id="layout-user-name">—</p>
+                <p class="layout-user-role" id="layout-user-role">—</p>
+            </div>
+            <button type="button" class="btn-dashboard" id="btn-logout">Salir</button>
+        </div>
+    </header>
+
+    <p class="api-status" id="layout-api-status"></p>
+    <div class="page-alert" id="page-message" hidden></div>
+
+    <main class="dashboard-shell">
+        <section class="dashboard-card">
+            <div class="section-toolbar">
+                <h2>Mis Facturas</h2>
+                <button type="button" class="btn-dashboard" id="btn-reload">Actualizar</button>
+            </div>
+            <div id="table-container" class="table-wrap">
+                <p class="table-loading">Cargando facturas...</p>
+            </div>
+            <div class="pagination-bar" id="pagination-bar"></div>
+        </section>
+    </main>
+
+    <!-- ═══ MODAL: ELEGIR MÉTODO DE PAGO ═══ -->
+    <div class="modal-overlay" id="modal-metodo">
+        <div class="modal-box">
+            <h3>¿Cómo deseas pagar? <button class="modal-close" id="metodo-close">✕</button></h3>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Factura: <strong id="metodo-factura-num" style="color:var(--text-ivory)">—</strong></p>
+            <p style="font-size:14px;color:var(--champagne-gold);font-weight:600;margin-bottom:16px">Total a pagar: <span id="metodo-total">$0</span></p>
+
+            <div class="metodo-grid">
+                <button class="metodo-btn" id="btn-metodo-efectivo">
+                    <span class="icon">💵</span>
+                    <span>Efectivo</span>
+                </button>
+                <button class="metodo-btn" id="btn-metodo-tarjeta">
+                    <span class="icon">💳</span>
+                    <span>Tarjeta</span>
+                </button>
+                <button class="metodo-btn" id="btn-metodo-pse">
+                    <span class="icon">🏦</span>
+                    <span>PSE / Banco</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: EFECTIVO ═══ -->
+    <div class="modal-overlay" id="modal-efectivo">
+        <div class="modal-box" style="max-width:420px;">
+            <h3>Pago en Efectivo <button class="modal-close" id="efectivo-close">✕</button></h3>
+            <div class="efectivo-info">
+                <p>Presenta esta solicitud en la recepción del taller:</p>
+                <div class="monto" id="efectivo-monto">$0</div>
+                <p style="color:var(--text-muted);font-size:11px">El recepcionista confirmará el pago cuando reciba el dinero.</p>
+            </div>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Observaciones (opcional):</p>
+            <textarea id="efectivo-obs" rows="2" placeholder="Ej: pagaré el viernes..."
+                style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
+            <div class="modal-actions">
+                <button class="btn-dashboard" id="efectivo-cancel">Cancelar</button>
+                <button class="btn-dashboard btn-dashboard-primary" id="btn-confirmar-efectivo">Enviar solicitud</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: TARJETA ═══ -->
+    <div class="modal-overlay" id="modal-tarjeta">
+        <div class="modal-box">
+            <h3>Pago con Tarjeta <button class="modal-close" id="tarjeta-close">✕</button></h3>
+
+            <!-- Visual de la tarjeta -->
+            <div class="card-visual" id="card-preview">
+                <div class="card-chip"></div>
+                <div class="card-number-display" id="card-num-display">•••• •••• •••• ••••</div>
+                <div class="card-info">
+                    <div>
+                        <div style="font-size:9px;margin-bottom:2px">TITULAR</div>
+                        <div id="card-name-display" style="color:#e8e4dc;font-size:13px">NOMBRE APELLIDO</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:9px;margin-bottom:2px">VENCE</div>
+                        <div id="card-exp-display" style="color:#e8e4dc;font-size:13px">MM/AA</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div>
+                    <label style="font-size:11px;color:var(--text-muted)">NÚMERO DE TARJETA</label>
+                    <input class="card-input" id="card-numero" type="text" maxlength="19"
+                        placeholder="1234 5678 9012 3456" autocomplete="cc-number">
+                </div>
+                <div>
+                    <label style="font-size:11px;color:var(--text-muted)">NOMBRE DEL TITULAR</label>
+                    <input class="card-input" id="card-nombre" type="text" maxlength="30"
+                        placeholder="Como aparece en la tarjeta" autocomplete="cc-name">
+                </div>
+                <div class="card-row">
+                    <div>
+                        <label style="font-size:11px;color:var(--text-muted)">VENCIMIENTO</label>
+                        <input class="card-input" id="card-exp" type="text" maxlength="5"
+                            placeholder="MM/AA" autocomplete="cc-exp">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;color:var(--text-muted)">CVV</label>
+                        <input class="card-input" id="card-cvv" type="password" maxlength="4"
+                            placeholder="•••" autocomplete="cc-csc">
+                    </div>
+                </div>
+                <div style="background:rgba(255,255,255,.03);border-radius:4px;padding:10px;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:8px;">
+                    🔒 Transacción protegida — Total: <strong style="color:var(--champagne-gold)" id="tarjeta-total">$0</strong>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-dashboard" id="tarjeta-cancel">Cancelar</button>
+                <button class="btn-dashboard btn-dashboard-primary" id="btn-pagar-tarjeta">Pagar ahora</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: PSE ═══ -->
+    <div class="modal-overlay" id="modal-pse">
+        <div class="modal-box">
+            <h3>Pago PSE — Débito Bancario <button class="modal-close" id="pse-close">✕</button></h3>
+
+            <div class="pse-logo">
+                <span class="pse-badge">PSE</span>
+                <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-ivory)">Pagos Seguros en Línea</div>
+                    <div style="font-size:11px;color:var(--text-muted)">Débito bancario en tiempo real</div>
+                </div>
+                <div style="margin-left:auto;font-size:12px;color:var(--champagne-gold);font-weight:600" id="pse-total">$0</div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="font-size:11px;color:var(--text-muted)">SELECCIONA TU BANCO</label>
+                <div class="bank-grid" id="bank-grid">
+                    <div class="bank-item" data-banco="Bancolombia">🏦 Bancolombia</div>
+                    <div class="bank-item" data-banco="Davivienda">🏦 Davivienda</div>
+                    <div class="bank-item" data-banco="Banco de Bogotá">🏦 Bco. Bogotá</div>
+                    <div class="bank-item" data-banco="BBVA">🏦 BBVA</div>
+                    <div class="bank-item" data-banco="Nequi">📱 Nequi</div>
+                    <div class="bank-item" data-banco="Daviplata">📱 Daviplata</div>
+                    <div class="bank-item" data-banco="Banco Popular">🏦 Bco. Popular</div>
+                    <div class="bank-item" data-banco="Colpatria">🏦 Colpatria</div>
+                    <div class="bank-item" data-banco="AV Villas">🏦 AV Villas</div>
+                    <div class="bank-item" data-banco="Banco Agrario">🏦 Agrario</div>
+                </div>
+            </div>
+
+            <div class="card-row" style="margin-bottom:12px;">
+                <div>
+                    <label style="font-size:11px;color:var(--text-muted)">TIPO DE PERSONA</label>
+                    <select id="pse-tipo-persona"
+                        style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:12px;margin-top:4px;">
+                        <option value="Natural">Natural</option>
+                        <option value="Juridica">Jurídica</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:11px;color:var(--text-muted)">TIPO DE DOCUMENTO</label>
+                    <select id="pse-tipo-doc"
+                        style="width:100%;background:#1a1b1f;border:1px solid var(--gold-border);color:#e8e4dc;padding:8px 12px;border-radius:4px;font-family:inherit;font-size:12px;margin-top:4px;">
+                        <option value="CC">CC</option>
+                        <option value="CE">CE</option>
+                        <option value="NIT">NIT</option>
+                        <option value="PA">Pasaporte</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="font-size:11px;color:var(--text-muted)">NÚMERO DE DOCUMENTO</label>
+                <input class="card-input" id="pse-doc" type="text" placeholder="Tu número de identificación" style="margin-top:4px;">
+            </div>
+
+            <div style="background:rgba(255,255,255,.03);border-radius:4px;padding:10px;font-size:12px;color:var(--text-muted);margin-bottom:4px;">
+                🔒 Serás redirigido al portal seguro de tu banco para autorizar el débito.
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-dashboard" id="pse-cancel">Cancelar</button>
+                <button class="btn-dashboard btn-dashboard-primary" id="btn-pagar-pse">Continuar al banco</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MODAL: TOKEN / CONFIRMACIÓN ═══ -->
+    <div class="modal-overlay" id="modal-token">
+        <div class="modal-box" style="max-width:440px;text-align:center;">
+            <h3 id="token-titulo">Pago procesado <button class="modal-close" id="token-close">✕</button></h3>
+            <div id="token-content"></div>
+            <div class="modal-actions" style="justify-content:center;margin-top:16px;">
+                <button class="btn-dashboard btn-dashboard-primary" id="token-ok">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../utils.js"></script>
+    <script src="../api.js"></script>
+    <script src="../auth-guard.js"></script>
+    <script src="../layout.js"></script>
+    <script src="mis-facturas.js"></script>
+</body>
+</html>

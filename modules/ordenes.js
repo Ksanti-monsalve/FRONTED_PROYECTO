@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const puedeFinalizar = utils.hasRole(roles, 'admin', 'jefetaller', 'mecan');
     const puedeCancelar  = utils.hasRole(roles, 'admin', 'recep', 'jefetaller');
     const puedeEliminar  = utils.hasRole(roles, 'admin', 'jefetaller');
+    const puedeFacturar  = utils.hasRole(roles, 'admin', 'recep');
 
     // Elementos UI
     const container   = document.getElementById('table-container');
@@ -75,6 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (o.estado === 'En Proceso' && puedeFinalizar) acciones += `<button class="btn-accion btn-finalizar" data-id="${id}">Finalizar</button>`;
             if (['Pendiente','Aprobada','En Proceso'].includes(o.estado) && puedeCancelar)
                                                               acciones += `<button class="btn-accion btn-cancelar"  data-id="${id}">Cancelar</button>`;
+            if (o.estado === 'Finalizada' && puedeFacturar) {
+                const cliId = raw.clienteId ?? raw.ClienteId ?? '';
+                acciones += `<button class="btn-accion btn-factura"
+                    data-cliente-id="${cliId}" data-cliente-nombre="${utils.escapeHtml(o.cliente)}"
+                    style="border-color:#a78bfa;color:#a78bfa">Factura</button>`;
+            }
             if (puedeEliminar)
                 acciones += `<button class="btn-accion btn-eliminar" data-id="${id}"
                     style="border-color:#6b7280;color:#6b7280;font-size:10px">🗑</button>`;
@@ -118,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => finalizarOrden(btn.dataset.id)));
         container.querySelectorAll('.btn-cancelar').forEach(btn =>
             btn.addEventListener('click', () => abrirModalCancelar(btn.dataset.id)));
+        container.querySelectorAll('.btn-factura').forEach(btn =>
+            btn.addEventListener('click', () =>
+                abrirModalFactura(btn.dataset.clienteId, btn.dataset.clienteNombre)));
         container.querySelectorAll('.btn-eliminar').forEach(btn =>
             btn.addEventListener('click', () => eliminarOrden(btn.dataset.id)));
     }
@@ -746,6 +756,100 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             utils.setPageMessage(messageEl, 'error', err.message);
             modalAddMano.classList.remove('open');
+        }
+    });
+
+    // ── Generar Factura Consolidada ────────────────────────────────────────────
+    const modalFactura = document.getElementById('modal-factura');
+    let facturaClienteId = null;
+
+    async function abrirModalFactura(clienteId, clienteNombre) {
+        facturaClienteId = clienteId;
+        document.getElementById('factura-descuento').value = '0';
+        document.getElementById('factura-metodo').value = 'Efectivo';
+        document.getElementById('factura-resumen').innerHTML =
+            '<p style="color:var(--text-muted);font-size:12px">Cargando órdenes pendientes de facturar...</p>';
+        modalFactura.classList.add('open');
+
+        try {
+            // Cargar todas las órdenes finalizadas sin facturar del cliente
+            const resp = await api.facturas.ordenesPendientes(clienteId);
+            const ordenes = resp?.data ?? [];
+
+            if (!ordenes.length) {
+                document.getElementById('factura-resumen').innerHTML =
+                    `<p style="color:#f87171;font-size:12px">
+                        ${utils.escapeHtml(clienteNombre)} no tiene órdenes finalizadas pendientes de facturar.
+                    </p>`;
+                document.getElementById('btn-confirmar-factura').disabled = true;
+                return;
+            }
+
+            document.getElementById('btn-confirmar-factura').disabled = false;
+            const subtotal = ordenes.reduce((s, o) => s + Number(o.total ?? 0), 0);
+
+            const filasOrdenes = ordenes.map(o => `
+                <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+                    <td style="padding:4px 6px;color:var(--bronze-gold)">${utils.escapeHtml(o.numeroOrden)}</td>
+                    <td style="padding:4px 6px;font-size:11px;color:var(--text-muted)">${utils.escapeHtml((o.descripcion||'').substring(0,35))}</td>
+                    <td style="padding:4px 6px;text-align:right">$${Number(o.total ?? 0).toLocaleString('es-CO')}</td>
+                </tr>`).join('');
+
+            document.getElementById('factura-resumen').innerHTML = `
+                <p style="font-size:11px;color:var(--bronze-gold);margin-bottom:8px;letter-spacing:.06em">
+                    ÓRDENES A INCLUIR (${ordenes.length}) — ${utils.escapeHtml(clienteNombre)}
+                </p>
+                <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">
+                    <tbody>${filasOrdenes}</tbody>
+                </table>
+                <div style="font-size:12px;display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding-top:8px;border-top:1px solid var(--gold-border)">
+                    <span style="color:var(--text-muted)">Subtotal</span>
+                    <span style="text-align:right">$${subtotal.toLocaleString('es-CO')}</span>
+                    <span style="color:var(--text-muted)">IVA (19%)</span>
+                    <span style="text-align:right" id="factura-iva-calc">$${Math.round(subtotal*0.19).toLocaleString('es-CO')}</span>
+                    <span style="font-weight:600;color:var(--champagne-gold)">TOTAL</span>
+                    <span style="text-align:right;font-weight:600;color:var(--champagne-gold)" id="factura-total-calc">$${Math.round(subtotal*1.19).toLocaleString('es-CO')}</span>
+                </div>`;
+
+            // Recalcular al cambiar descuento
+            document.getElementById('factura-descuento').oninput = () => {
+                const desc = parseFloat(document.getElementById('factura-descuento').value) || 0;
+                const base = Math.max(0, subtotal - desc);
+                const iva  = Math.round(base * 0.19);
+                const ivaEl = document.getElementById('factura-iva-calc');
+                const totEl = document.getElementById('factura-total-calc');
+                if (ivaEl) ivaEl.textContent = `$${iva.toLocaleString('es-CO')}`;
+                if (totEl) totEl.textContent = `$${(base + iva).toLocaleString('es-CO')}`;
+            };
+        } catch (err) {
+            document.getElementById('factura-resumen').innerHTML =
+                `<p style="color:#f87171;font-size:12px">Error: ${utils.escapeHtml(err.message)}</p>`;
+        }
+    }
+
+    document.getElementById('factura-close')?.addEventListener('click',  () => modalFactura.classList.remove('open'));
+    document.getElementById('factura-cancel')?.addEventListener('click', () => modalFactura.classList.remove('open'));
+    modalFactura?.addEventListener('click', e => { if (e.target === modalFactura) modalFactura.classList.remove('open'); });
+
+    document.getElementById('btn-confirmar-factura')?.addEventListener('click', async () => {
+        const descuento  = parseFloat(document.getElementById('factura-descuento').value) || 0;
+        const metodoPago = document.getElementById('factura-metodo').value || 'Efectivo';
+        const btn = document.getElementById('btn-confirmar-factura');
+        btn.disabled = true; btn.textContent = 'Generando...';
+        try {
+            const resp = await api.facturas.consolidada(facturaClienteId, descuento, metodoPago);
+            const f = resp?.data ?? resp;
+            modalFactura.classList.remove('open');
+            const numOrdenes = (f?.numerosOrdenes ?? [f?.numeroOrden]).filter(Boolean);
+            utils.setPageMessage(messageEl, 'success',
+                `✓ Factura ${f?.numeroFactura ?? ''} generada por $${Number(f?.total ?? 0).toLocaleString('es-CO')} — ` +
+                `incluye ${numOrdenes.length} orden(es): ${numOrdenes.join(', ')}.`);
+            cargarOrdenes();
+        } catch (err) {
+            utils.setPageMessage(messageEl, 'error', err.message);
+            modalFactura.classList.remove('open');
+        } finally {
+            btn.disabled = false; btn.textContent = 'Generar Factura';
         }
     });
 

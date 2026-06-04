@@ -193,18 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailInput = document.getElementById('email');
 
     const credentials = {
-        admin: {
-            email: 'admin@autotaller.com',
-            pass: 'Admin@123'
-        },
-        mecanico: {
-            email: 'mecanico@autotaller.com',
-            pass: 'Mecanico@123'
-        },
-        recepcionista: {
-            email: 'recepcion@autotaller.com',
-            pass: 'Recepcion@123'
-        }
+        admin:        { email: 'admin@autotaller.com',        pass: 'Admin@123'       },
+        jefe:         { email: 'jefe@autotaller.com',         pass: 'Jefe@123'        },
+        mecanico:     { email: 'mecanico@autotaller.com',     pass: 'Mecanico@123'    },
+        recepcionista:{ email: 'recepcion@autotaller.com',    pass: 'Recepcion@123'   },
+        almacen:      { email: 'almacen@autotaller.com',      pass: 'Almacen@123'     },
+        bodega:       { email: 'bodega@autotaller.com',       pass: 'Bodega@123'      },
+        diagnostico:  { email: 'diagnostico@autotaller.com',  pass: 'Diagnostico@123' },
+        mecanicoarea: { email: 'mecanicoArea@autotaller.com', pass: 'MecArea@123'     },
     };
 
     roleChips.forEach(chip => {
@@ -214,11 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chip.classList.add('active-chip');
 
             const role = chip.getAttribute('data-role');
-            let data = null;
-
-            if (role === 'admin') data = credentials.admin;
-            else if (role === 'mecanico') data = credentials.mecanico;
-            else data = credentials.recepcionista;
+            const data = credentials[role] ?? credentials.admin;
 
             // Clear errors prior to typing
             clearValidationStates();

@@ -394,8 +394,9 @@ html, body {
 
 .roles-chips {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 16px;
+    gap: 10px 18px;
 }
 
 .role-chip {

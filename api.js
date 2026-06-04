@@ -453,6 +453,41 @@
             `/api/Facturas${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 20 })}`
         ),
         getById: (id) => request(`/api/Facturas/${id}`),
+        // Cliente: ver sus propias facturas
+        misFacturas: (params = {}) => requestList(
+            `/api/Facturas/mis-facturas${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 10 })}`
+        ),
+        // Cliente: iniciar proceso de pago (genera token para electrónicos, solicitud para efectivo)
+        iniciarPago: (facturaId, tipoPago, referencia, observaciones) => request('/api/Facturas/iniciar-pago', {
+            method: 'POST',
+            body: JSON.stringify({ FacturaId: facturaId, TipoPago: tipoPago, Referencia: referencia ?? null, Observaciones: observaciones ?? null }),
+        }),
+        // Admin/Recep: ver solicitudes de pago pendientes
+        solicitudesPago: (params = {}) => requestList(
+            `/api/Facturas/solicitudes-pago${buildQuery({ PageNumber: params.pagina ?? 1, PageSize: params.tamano ?? 20, estado: params.estado })}`
+        ),
+        // Admin/Recep: confirmar pago en efectivo
+        confirmarEfectivo: (solicitudId, observaciones) => request(`/api/Facturas/solicitudes-pago/${solicitudId}/confirmar`, {
+            method: 'POST',
+            body: JSON.stringify({ Observaciones: observaciones ?? null }),
+        }),
+        // Registra el pago de una factura pendiente
+        pagar: (facturaId, metodoPagoId, monto, referencia) => request(`/api/Facturas/${facturaId}/pagar`, {
+            method: 'POST',
+            body: JSON.stringify({ MetodoPagoId: metodoPagoId, Monto: monto, Referencia: referencia ?? null }),
+        }),
+        // Genera factura para una orden finalizada (individual, legado)
+        generar: (ordenId, descuento, metodoPago) => request('/api/Facturas/generar', {
+            method: 'POST',
+            body: JSON.stringify({ OrdenServicioId: ordenId, Descuento: descuento ?? 0, MetodoPago: metodoPago ?? null }),
+        }),
+        // Genera factura CONSOLIDADA con todas las órdenes finalizadas del cliente
+        consolidada: (clienteId, descuento, metodoPago) => request('/api/Facturas/consolidada', {
+            method: 'POST',
+            body: JSON.stringify({ ClienteId: clienteId, Descuento: descuento ?? 0, MetodoPago: metodoPago ?? null }),
+        }),
+        // Lista órdenes finalizadas sin facturar de un cliente
+        ordenesPendientes: (clienteId) => request(`/api/Facturas/ordenes-pendientes/${clienteId}`),
     };
 
     // ── Dashboard API ─────────────────────────────────────────────────────────
@@ -472,6 +507,7 @@
         tiposDocumento: () => request('/api/Catalogos/tipos-documento', { auth: false }),
         tiposServicio: () => request('/api/Catalogos/tipos-servicio'),
         categoriasRepuesto: () => request('/api/Catalogos/categorias-repuesto'),
+        metodosPago: () => request('/api/Catalogos/metodos-pago'),
     };
 
     // ── Auth extendido (registro de cliente) ──────────────────────────────────

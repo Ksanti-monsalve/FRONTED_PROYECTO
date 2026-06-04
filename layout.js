@@ -59,6 +59,8 @@
             { key: 'proveedores',   label: 'Proveedores',    route: 'proveedores',  roles: ['admin', 'recep'] },
             // Facturas: RecepcionOnly + Reportes → admin, recep, jefetaller, almacen, bodega
             { key: 'facturas',      label: 'Facturas',       route: 'facturas',     roles: ['admin', 'recep', 'jefetaller', 'almacen', 'bodega'] },
+            // Mis Facturas: solo el cliente (y admin/recep para pruebas)
+            { key: 'mis-facturas',  label: 'Mis Facturas',   route: 'mis-facturas', roles: ['cliente'] },
             { key: 'configuracion', label: 'Config',         route: 'configuracion',roles: ['admin'] },
         ];
 
